@@ -1,15 +1,20 @@
 import fastify from 'fastify';
 import cors from '@fastify/cors';
+import { linkRoutes } from './routes/linkRoutes';
 
 const app = fastify({ logger: true });
 
 // Registrar plugins
 app.register(cors, {
-  origin: true, // Permitir qualquer origem (remover em produção)
+  origin: true, // Permitir qualquer origem (em produção, você deve restringir isto)
 });
 
+// Registrar rotas
+app.register(linkRoutes);
+
+// Rota principal
 app.get('/', async (request, reply) => {
-  return { hello: 'world' };
+  return { message: 'Brev.ly API - Encurtador de URLs' };
 });
 
 const start = async () => {
