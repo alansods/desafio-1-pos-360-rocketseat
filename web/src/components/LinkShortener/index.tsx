@@ -1,30 +1,59 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LinkForm } from './LinkForm'
 import { LinkList, Link } from './LinkList'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
 export function LinkShortener() {
-  const [links, setLinks] = useState<Link[]>([
-    {
-      original: 'https://www.teste.com',
-      short: 'https://brev.ly/abc123',
-      visits: 42
-    }
-  ])
+  const [links, setLinks] = useState<Link[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/links`)
+      .then(res => res.json())
+      .then((data: any[]) => {
+        setLinks(data.map(link => ({
+          id: link.id,
+          url: link.url,
+          shortUrl: link.shortUrl,
+          shortUrlFull: `${window.location.origin}/${link.shortUrl}`,
+          createdAt: link.createdAt,
+          accessCount: link.accessCount
+        })))
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
 
   function handleSaveLink(original: string, short: string) {
-    setLinks(prev => [
-      { original, short, visits: 0 },
-      ...prev,
-    ])
+    fetch(`${API_BASE}/links`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: original, shortUrl: short || undefined })
+    })
+      .then(res => res.json())
+      .then(link => {
+        setLinks(prev => [
+          {
+            id: link.id,
+            url: link.url,
+            shortUrl: link.shortUrl,
+            shortUrlFull: `${window.location.origin}/${link.shortUrl}`,
+            createdAt: link.createdAt,
+            accessCount: link.accessCount
+          },
+          ...prev,
+        ])
+      })
   }
 
-  function handleCopyLink(short: string) {
+  function handleCopyLink(shortUrlFull: string) {
     if (navigator && navigator.clipboard) {
-      navigator.clipboard.writeText(short)
+      navigator.clipboard.writeText(shortUrlFull)
     } else {
       // fallback
       const textarea = document.createElement('textarea')
-      textarea.value = short
+      textarea.value = shortUrlFull
       document.body.appendChild(textarea)
       textarea.select()
       document.execCommand('copy')
@@ -32,8 +61,13 @@ export function LinkShortener() {
     }
   }
 
-  function handleDeleteLink(short: string) {
-    setLinks(prev => prev.filter(link => link.short !== short))
+  function handleDeleteLink(id: string) {
+    fetch(`${API_BASE}/links/${id}`, { method: 'DELETE' })
+      .then(res => {
+        if (res.ok) {
+          setLinks(prev => prev.filter(link => link.id !== id))
+        }
+      })
   }
 
   return (
@@ -42,7 +76,7 @@ export function LinkShortener() {
         <LinkForm onSave={handleSaveLink} />
       </div>
       <div className="w-full md:w-[580px] min-h-[234px] bg-white rounded-lg p-8">
-        <LinkList links={links} onCopy={handleCopyLink} onDelete={handleDeleteLink} />
+        {loading ? <div>Carregando...</div> : <LinkList links={links} onCopy={handleCopyLink} onDelete={handleDeleteLink} />}
       </div>
     </div>
   )

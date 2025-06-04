@@ -4,7 +4,7 @@ import { Button } from '../ui/Button'
 
 export function LinkForm({ onSave }: { onSave: (original: string, short: string) => void }) {
   const [original, setOriginal] = useState('')
-  const [short, setShort] = useState('')
+  const [shortSuffix, setShortSuffix] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   function handleSubmit(e: React.FormEvent) {
@@ -14,9 +14,9 @@ export function LinkForm({ onSave }: { onSave: (original: string, short: string)
       return
     }
     setError(null)
-    onSave(original, short)
+    onSave(original, shortSuffix)
     setOriginal('')
-    setShort('')
+    setShortSuffix('')
   }
 
   return (
@@ -29,12 +29,19 @@ export function LinkForm({ onSave }: { onSave: (original: string, short: string)
         onChange={e => setOriginal(e.target.value)}
         error={error || undefined}
       />
-      <Input
-        label="LINK ENCURTADO"
-        placeholder="brev.ly/"
-        value={short}
-        onChange={e => setShort(e.target.value)}
-      />
+      <div className="flex flex-col gap-1">
+        <label className="block text-xs font-semibold mb-1 text-gray-500">LINK ENCURTADO</label>
+        <div className="relative w-full">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none select-none">brev.ly/</span>
+          <input
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-600 focus:outline-none transition-colors text-base pl-[71px]"
+            type="text"
+            value={shortSuffix}
+            onChange={e => setShortSuffix(e.target.value)}
+            style={{ minWidth: '0' }}
+          />
+        </div>
+      </div>
       <Button type="submit" variant="primary" className="mt-6 h-12 text-base font-semibold" disabled={!original}>Salvar link</Button>
     </form>
   )

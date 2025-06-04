@@ -11,7 +11,10 @@ export class LinkService {
   // Criar um novo link
   async createLink(data: CreateLinkDTO): Promise<Link> {
     const shortUrl = data.shortUrl || this.generateShortUrl();
-    
+    // Validação: shortUrl não pode ser uma URL completa ou conter pontos
+    if (/^(https?:\/\/)/i.test(shortUrl) || shortUrl.includes('.')) {
+      throw new Error('O identificador do link encurtado não pode ser uma URL ou conter pontos. Use apenas letras, números e traços.');
+    }
     // Verificar se já existe
     const existingLink = await prisma.link.findUnique({
       where: { shortUrl }
