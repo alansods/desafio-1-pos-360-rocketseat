@@ -4,15 +4,15 @@ import { Copy, Trash } from 'phosphor-react'
 type Props = {
   id: string
   url: string
-  shortUrl: string
   shortUrlFull: string
   createdAt: string
   accessCount: number
   onCopy: (shortUrlFull: string) => void
   onDelete: (id: string) => void
+  onVisit: () => void
 }
 
-export function LinkItem({ id, url, shortUrl, shortUrlFull, accessCount, onCopy, onDelete }: Props) {
+export function LinkItem({ id, url, shortUrlFull, accessCount, onCopy, onDelete, onVisit }: Props) {
   return (
     <div className="flex items-center justify-between py-3 border-b last:border-b-0 w-full">
       <div>
@@ -21,6 +21,7 @@ export function LinkItem({ id, url, shortUrl, shortUrlFull, accessCount, onCopy,
           target="_blank"
           rel="noopener noreferrer"
           className="font-semibold text-blue-700 hover:underline text-base block"
+          onClick={onVisit}
         >
           {shortUrlFull}
         </a>

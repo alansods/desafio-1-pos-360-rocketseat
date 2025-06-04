@@ -16,13 +16,33 @@ export function LinkShortener() {
           id: link.id,
           url: link.url,
           shortUrl: link.shortUrl,
-          shortUrlFull: `${window.location.origin}/${link.shortUrl}`,
+          shortUrlFull: `${API_BASE.replace(/\\?\/links$/, '')}/${link.shortUrl}`,
           createdAt: link.createdAt,
           accessCount: link.accessCount
         })))
         setLoading(false)
       })
       .catch(() => setLoading(false))
+  }, [])
+
+  // Atualização automática da lista de links a cada 5 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch(`${API_BASE}/links`)
+        .then(res => res.json())
+        .then((data: any[]) => {
+          setLinks(data.map(link => ({
+            id: link.id,
+            url: link.url,
+            shortUrl: link.shortUrl,
+            shortUrlFull: `${API_BASE.replace(/\\?\/links$/, '')}/${link.shortUrl}`,
+            createdAt: link.createdAt,
+            accessCount: link.accessCount
+          })))
+        })
+        .catch(() => {})
+    }, 5000)
+    return () => clearInterval(interval)
   }, [])
 
   function handleSaveLink(original: string, short: string) {
@@ -38,7 +58,7 @@ export function LinkShortener() {
             id: link.id,
             url: link.url,
             shortUrl: link.shortUrl,
-            shortUrlFull: `${window.location.origin}/${link.shortUrl}`,
+            shortUrlFull: `${API_BASE.replace(/\\?\/links$/, '')}/${link.shortUrl}`,
             createdAt: link.createdAt,
             accessCount: link.accessCount
           },
@@ -70,13 +90,30 @@ export function LinkShortener() {
       })
   }
 
+  function handleVisitLink() {
+    // Força o refresh imediato dos links após o clique
+    fetch(`${API_BASE}/links`)
+      .then(res => res.json())
+      .then((data: any[]) => {
+        setLinks(data.map(link => ({
+          id: link.id,
+          url: link.url,
+          shortUrl: link.shortUrl,
+          shortUrlFull: `${API_BASE.replace(/\\?\/links$/, '')}/${link.shortUrl}`,
+          createdAt: link.createdAt,
+          accessCount: link.accessCount
+        })))
+      })
+      .catch(() => {})
+  }
+
   return (
     <div className="flex flex-col md:flex-row justify-center items-start gap-y-8 md:gap-y-0 md:gap-x-5 w-full mx-auto">
       <div className="w-full md:w-[380px] bg-white rounded-lg p-8">
         <LinkForm onSave={handleSaveLink} />
       </div>
       <div className="w-full md:w-[580px] min-h-[234px] bg-white rounded-lg p-8">
-        {loading ? <div>Carregando...</div> : <LinkList links={links} onCopy={handleCopyLink} onDelete={handleDeleteLink} />}
+        {loading ? <div>Carregando...</div> : <LinkList links={links} onCopy={handleCopyLink} onDelete={handleDeleteLink} onVisit={handleVisitLink} />}
       </div>
     </div>
   )

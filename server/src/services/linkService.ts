@@ -27,7 +27,8 @@ export class LinkService {
     return prisma.link.create({
       data: {
         url: data.url,
-        shortUrl
+        shortUrl,
+        accessCount: 0
       }
     });
   }
