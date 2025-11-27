@@ -7,7 +7,7 @@ import { Copy, Trash2, Download } from 'lucide-react'
 import { useState } from 'react'
 
 const createLinkSchema = z.object({
-  shortUrl: z.string().min(3, "Code must be at least 3 characters"),
+  code: z.string().min(3, "Code must be at least 3 characters"),
   url: z.string().url("Invalid URL"),
 })
 
@@ -136,10 +136,10 @@ export function Home() {
                             <input 
                               className="flex h-10 w-full rounded-md border border-input bg-background pl-[3.9rem] pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                               placeholder="exemplo" 
-                              {...register('shortUrl')} 
+                              {...register('code')} 
                             />
                         </div>
-                        {errors.shortUrl && <span className="text-xs text-destructive">{errors.shortUrl.message}</span>}
+                        {errors.code && <span className="text-xs text-destructive">{errors.code.message}</span>}
                     </div>
 
                     <button 
