@@ -62,8 +62,12 @@ export class LinkController {
   async exportLinksCSV(request: FastifyRequest, reply: FastifyReply) {
     try {
       const exportService = getExportService();
-      const csvUrl = await exportService.exportLinksToCSV();
-      return reply.send({ csvUrl });
+      const csvContent = await exportService.generateCsvContent();
+
+      return reply
+        .header('Content-Type', 'text/csv; charset=utf-8')
+        .header('Content-Disposition', 'attachment; filename="links.csv"')
+        .send(csvContent);
     } catch (error: any) {
       return reply.code(500).send({ error: error.message });
     }

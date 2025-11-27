@@ -1,1 +1,0 @@
-export { LinkShortener } from './LinkShortener/index'

@@ -171,7 +171,7 @@ class ExportService {
         try {
           const r2Url = await this.uploadToR2(filePath, fileName);
           console.log('✅ Arquivo exportado com sucesso para R2:', r2Url);
-          
+
           // Limpar arquivo temporário
           fs.unlinkSync(filePath);
           return r2Url;
@@ -185,15 +185,51 @@ class ExportService {
       console.log('📁 Usando armazenamento local...');
       const localUrl = this.saveLocally(filePath, fileName);
       console.log('✅ Arquivo salvo localmente:', localUrl);
-      
+
       // Limpar arquivo temporário original
       fs.unlinkSync(filePath);
-      
+
       return localUrl;
     } catch (error) {
       console.error('❌ Erro durante exportação:', error);
       throw error;
     }
+  }
+
+  async generateCsvContent(): Promise<string> {
+    console.log('📊 Gerando conteúdo CSV...');
+    const links = await prisma.link.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    console.log(`📝 Encontrados ${links.length} links para exportar`);
+
+    // Criar CSV manualmente
+    const headers = ['ID', 'URL Original', 'URL Encurtada', 'Data de Criação', 'Contagem de Acessos'];
+    const rows = links.map(link => [
+      link.id,
+      link.url,
+      link.shortUrl,
+      link.createdAt.toISOString(),
+      link.accessCount.toString()
+    ]);
+
+    // Função helper para escapar campos CSV
+    const escapeCsvField = (field: string): string => {
+      if (field.includes(',') || field.includes('"') || field.includes('\n')) {
+        return `"${field.replace(/"/g, '""')}"`;
+      }
+      return field;
+    };
+
+    // Montar CSV
+    const csvContent = [
+      headers.map(escapeCsvField).join(','),
+      ...rows.map(row => row.map(escapeCsvField).join(','))
+    ].join('\n');
+
+    console.log('✅ Conteúdo CSV gerado');
+    return csvContent;
   }
 }
 

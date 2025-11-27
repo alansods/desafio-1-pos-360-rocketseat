@@ -1,88 +1,156 @@
-import * as dotenv from 'dotenv';
-import path from 'path';
+import fastify from 'fastify'
+import cors from '@fastify/cors'
+import { z } from 'zod'
+import { db } from './db'
+import { links } from './db/schema'
+import { eq, desc } from 'drizzle-orm'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { randomUUID } from 'node:crypto'
 
-// Configurar caminhos
-const rootDir = path.resolve(process.cwd());
+const app = fastify()
 
-// Tentar carregar o .env de diferentes locais possíveis
-const envPaths = [
-  path.join(rootDir, '.env'),
-  path.join(process.cwd(), '.env'),
-  path.join(process.cwd(), 'server', '.env')
-];
-
-let envLoaded = false;
-for (const envPath of envPaths) {
-  const result = dotenv.config({ path: envPath });
-  if (!result.error) {
-    console.log('✅ Arquivo .env carregado com sucesso de:', envPath);
-    envLoaded = true;
-    break;
-  }
-}
-
-if (!envLoaded) {
-  console.error('❌ Erro ao carregar o arquivo .env');
-  console.error('Caminhos tentados:');
-  envPaths.forEach(path => console.error('- ' + path));
-  console.error('\nDiretório atual:', process.cwd());
-  throw new Error('Falha ao carregar variáveis de ambiente');
-}
-
-// Verificar variáveis obrigatórias
-const requiredEnvVars = [
-  'CLOUDFLARE_ACCOUNT_ID', 
-  'CLOUDFLARE_ACCESS_KEY_ID', 
-  'CLOUDFLARE_SECRET_ACCESS_KEY', 
-  'CLOUDFLARE_BUCKET'
-];
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-if (missingEnvVars.length > 0) {
-  console.error('❌ Variáveis de ambiente obrigatórias não encontradas:', missingEnvVars);
-  console.error('\nCertifique-se de que seu arquivo .env contém as seguintes variáveis:');
-  console.error(`
-CLOUDFLARE_ACCOUNT_ID=seu_account_id
-CLOUDFLARE_ACCESS_KEY_ID=sua_access_key
-CLOUDFLARE_SECRET_ACCESS_KEY=sua_secret_key
-CLOUDFLARE_BUCKET=nome_do_seu_bucket
-  `);
-  throw new Error('Variáveis de ambiente obrigatórias não encontradas');
-}
-
-// Agora podemos importar o restante das dependências
-import fastify from 'fastify';
-import cors from '@fastify/cors';
-import { linkRoutes } from './routes/linkRoutes';
-import fastifyStatic from '@fastify/static';
-
-console.log('📦 Configurações Cloudflare R2:', {
-  bucket: process.env.CLOUDFLARE_BUCKET,
-  accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
-  hasAccessKey: !!process.env.CLOUDFLARE_ACCESS_KEY_ID,
-  hasSecretKey: !!process.env.CLOUDFLARE_SECRET_ACCESS_KEY
-});
-
-const app = fastify();
-
-// Configurar CORS
 app.register(cors, {
-  origin: true
-});
+  origin: '*',
+})
 
-// Registrar rotas
-app.register(linkRoutes);
+const s3 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.CLOUDFLARE_SECRET_ACCESS_KEY || '',
+  },
+})
 
-// Configurar diretório público para servir arquivos estáticos
-app.register(fastifyStatic, {
-  root: path.join(rootDir, 'public'),
-  prefix: '/'
-});
+// Helper function to escape CSV fields
+function escapeCsvField(field: string | number | null | undefined): string {
+    const value = field?.toString() || ''
+    // If field contains comma, quote, newline, or carriage return, wrap in quotes and escape existing quotes
+    if (value.includes(',') || value.includes('"') || value.includes('\n') || value.includes('\r')) {
+        return `"${value.replace(/"/g, '""')}"`
+    }
+    return value
+}
 
-app.listen({ port: 3333 }, (err) => {
-  if (err) {
-    console.error('❌ Erro ao iniciar servidor:', err);
-    process.exit(1);
+// Export to CSV - MUST come before /:code route to avoid conflicts
+app.get('/links/export/csv', async (request, reply) => {
+    const data = await db.select().from(links).orderBy(desc(links.createdAt))
+
+    // Create CSV rows with proper escaping
+    const headers = ['ID', 'Code', 'Original URL', 'Access Count', 'Created At']
+    const rows = data.map(link => [
+        escapeCsvField(link.id),
+        escapeCsvField(link.code),
+        escapeCsvField(link.originalUrl),
+        escapeCsvField(link.accessCount),
+        escapeCsvField(link.createdAt?.toISOString())
+    ])
+
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+    ].join('\n')
+
+    // Add UTF-8 BOM for Excel compatibility
+    const bom = '\uFEFF'
+
+    return reply
+        .header('Content-Type', 'text/csv; charset=utf-8')
+        .header('Content-Disposition', 'attachment; filename="links.csv"')
+        .send(bom + csvContent)
+})
+
+// Create a link
+app.post('/links', async (request, reply) => {
+  const createLinkSchema = z.object({
+    code: z.string().min(3),
+    url: z.string().url(),
+  })
+
+  const { code, url } = createLinkSchema.parse(request.body)
+
+  try {
+    const result = await db.insert(links).values({
+      code,
+      originalUrl: url,
+    }).returning()
+
+    const link = result[0]
+    // Return in frontend expected format
+    return reply.status(201).send({
+      id: link.id,
+      url: link.originalUrl,
+      shortUrl: link.code,
+      createdAt: link.createdAt,
+      accessCount: link.accessCount
+    })
+  } catch (err: any) {
+    if (err.code === '23505') {
+      return reply.status(409).send({ message: 'Duplicated code' })
+    }
+    console.error(err)
+    return reply.status(500).send({ message: 'Internal error' })
   }
-  console.log('🚀 Servidor rodando em http://localhost:3333');
-});
+})
+
+// List links
+app.get('/links', async () => {
+  const result = await db.select().from(links).orderBy(desc(links.createdAt))
+  // Map to frontend expected format
+  return result.map(link => ({
+    id: link.id,
+    url: link.originalUrl,
+    shortUrl: link.code,
+    createdAt: link.createdAt,
+    accessCount: link.accessCount
+  }))
+})
+
+// Get original URL (Redirect)
+app.get('/:code', async (request, reply) => {
+  const getLinkSchema = z.object({
+    code: z.string(),
+  })
+
+  const { code } = getLinkSchema.parse(request.params)
+
+  const result = await db.select().from(links).where(eq(links.code, code))
+
+  if (result.length === 0) {
+    return reply.status(404).send({ message: 'Link not found' })
+  }
+
+  const link = result[0]
+
+  // Increment access count asynchronously
+  await db.update(links)
+    .set({ accessCount: (link.accessCount || 0) + 1 })
+    .where(eq(links.id, link.id))
+
+  return reply.redirect(301, link.originalUrl)
+})
+
+// Delete a link
+app.delete('/links/:id', async (request, reply) => {
+  const deleteLinkSchema = z.object({
+    id: z.string().uuid(),
+  })
+
+  const { id } = deleteLinkSchema.parse(request.params)
+
+  await db.delete(links).where(eq(links.id, id))
+
+  return reply.status(204).send()
+})
+
+// Increment access count (Explicit endpoint if needed, but redirect handles it)
+// The requirements say "Deve ser possível incrementar a quantidade de acessos de um link"
+// Usually this happens on redirect, but I'll add an endpoint just in case the frontend wants to track clicks without redirecting (e.g. via beacon)
+// But for a shortener, the redirect is the main event. I'll stick to the redirect logic for now.
+
+app.listen({
+  port: 3333,
+  host: '0.0.0.0',
+}).then(() => {
+  console.log('HTTP Server Running!')
+})
