@@ -1,67 +1,73 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { linkService } from '../services/linkService';
-import { CreateLinkDTO } from '../models/link';
-import { getExportService } from '../services/exportService';
+import { exportService } from '../services/exportService';
+import { createLinkSchema, getLinkSchema, deleteLinkSchema } from '../schemas/linkSchema';
 
 export class LinkController {
-  async createLink(request: FastifyRequest<{ Body: CreateLinkDTO }>, reply: FastifyReply) {
+  async createLink(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const link = await linkService.createLink(request.body);
-      return reply.code(201).send(link);
+      const { code, url } = createLinkSchema.parse(request.body)
+      
+      const link = await linkService.createLink({ code, url });
+      
+      return reply.code(201).send({
+        id: link.id,
+        url: link.originalUrl,
+        shortUrl: link.code,
+        createdAt: link.createdAt,
+        accessCount: link.accessCount
+      });
     } catch (error: any) {
-      return reply.code(400).send({ error: error.message });
+      if (error.code === '23505') {
+        return reply.status(409).send({ message: 'Duplicated code' })
+      }
+      return reply.code(500).send({ message: 'Internal error' });
     }
   }
 
   async getAllLinks(request: FastifyRequest, reply: FastifyReply) {
     try {
       const links = await linkService.getAllLinks();
-      return reply.send(links);
+      return reply.send(links.map(link => ({
+        id: link.id,
+        url: link.originalUrl,
+        shortUrl: link.code,
+        createdAt: link.createdAt,
+        accessCount: link.accessCount
+      })));
     } catch (error) {
-      return reply.code(500).send({ error: 'Erro ao buscar links' });
+      return reply.code(500).send({ message: 'Erro ao buscar links' });
     }
   }
 
-  async getLinkByShortUrl(request: FastifyRequest<{ Params: { shortUrl: string } }>, reply: FastifyReply) {
+  async redirectToOriginalUrl(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const { shortUrl } = request.params;
-      const link = await linkService.getLinkByShortUrl(shortUrl);
+      const { code } = getLinkSchema.parse(request.params);
+      const link = await linkService.getLinkByShortUrl(code);
+      
       if (!link) {
-        return reply.code(404).send({ error: 'Link não encontrado' });
+        return reply.code(404).send({ message: 'Link not found' });
       }
-      return reply.send(link);
+
+      await linkService.incrementAccessCount(link.id, link.accessCount || 0);
+      return reply.redirect(301, link.originalUrl);
     } catch (error) {
-      return reply.code(500).send({ error: 'Erro ao buscar link' });
+      return reply.code(500).send({ message: 'Erro ao redirecionar' });
     }
   }
 
-  async redirectToOriginalUrl(request: FastifyRequest<{ Params: { shortUrl: string } }>, reply: FastifyReply) {
+  async deleteLink(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const { shortUrl } = request.params;
-      const link = await linkService.getLinkByShortUrl(shortUrl);
-      if (!link) {
-        return reply.code(404).send({ error: 'Link não encontrado' });
-      }
-      await linkService.incrementAccessCount(shortUrl);
-      return reply.redirect(link.url);
-    } catch (error) {
-      return reply.code(500).send({ error: 'Erro ao redirecionar' });
-    }
-  }
-
-  async deleteLink(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
-    try {
-      const { id } = request.params;
+      const { id } = deleteLinkSchema.parse(request.params);
       await linkService.deleteLink(id);
       return reply.code(204).send();
     } catch (error) {
-      return reply.code(404).send({ error: 'Link não encontrado' });
+      return reply.code(500).send({ message: 'Erro ao deletar link' });
     }
   }
 
   async exportLinksCSV(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const exportService = getExportService();
       const csvContent = await exportService.generateCsvContent();
 
       return reply
@@ -69,7 +75,7 @@ export class LinkController {
         .header('Content-Disposition', 'attachment; filename="links.csv"')
         .send(csvContent);
     } catch (error: any) {
-      return reply.code(500).send({ error: error.message });
+      return reply.code(500).send({ message: error.message });
     }
   }
 }
