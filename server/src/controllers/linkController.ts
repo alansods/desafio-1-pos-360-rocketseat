@@ -18,9 +18,11 @@ export class LinkController {
         accessCount: link.accessCount
       });
     } catch (error: any) {
-      if (error.code === '23505') {
+      // Drizzle wraps the PostgreSQL error in a "cause" property
+      if (error.cause?.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
         return reply.status(409).send({ message: 'Duplicated code' })
       }
+      console.error('[CREATE LINK] Erro:', error);
       return reply.code(500).send({ message: 'Internal error' });
     }
   }
@@ -43,15 +45,24 @@ export class LinkController {
   async redirectToOriginalUrl(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { code } = getLinkSchema.parse(request.params);
+      console.log(`[REDIRECT] Buscando link com código: ${code}`);
+
       const link = await linkService.getLinkByShortUrl(code);
-      
+
       if (!link) {
+        console.log(`[REDIRECT] Link não encontrado: ${code}`);
         return reply.code(404).send({ message: 'Link not found' });
       }
 
-      await linkService.incrementAccessCount(link.id, link.accessCount || 0);
+      console.log(`[REDIRECT] Link encontrado - ID: ${link.id}, AccessCount ANTES: ${link.accessCount}`);
+      await linkService.incrementAccessCount(link.id);
+
+      const updatedLink = await linkService.getLinkByShortUrl(code);
+      console.log(`[REDIRECT] AccessCount DEPOIS: ${updatedLink?.accessCount}`);
+
       return reply.redirect(301, link.originalUrl);
     } catch (error) {
+      console.error(`[REDIRECT] Erro:`, error);
       return reply.code(500).send({ message: 'Erro ao redirecionar' });
     }
   }
@@ -63,6 +74,22 @@ export class LinkController {
       return reply.code(204).send();
     } catch (error) {
       return reply.code(500).send({ message: 'Erro ao deletar link' });
+    }
+  }
+
+  async incrementLinkAccess(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { id } = deleteLinkSchema.parse(request.params);
+      console.log(`[INCREMENT] Incrementando acesso para link ID: ${id}`);
+      const updatedLink = await linkService.incrementAccessCount(id);
+      console.log(`[INCREMENT] Novo accessCount: ${updatedLink.accessCount}`);
+      return reply.send({
+        id: updatedLink.id,
+        accessCount: updatedLink.accessCount
+      });
+    } catch (error) {
+      console.error(`[INCREMENT] Erro:`, error);
+      return reply.code(500).send({ message: 'Erro ao incrementar contador' });
     }
   }
 

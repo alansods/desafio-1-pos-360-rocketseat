@@ -1,6 +1,6 @@
 import { db } from '../db'
 import { links } from '../db/schema'
-import { eq, desc } from 'drizzle-orm'
+import { eq, desc, sql } from 'drizzle-orm'
 import { CreateLinkDTO } from '../schemas/linkSchema'
 
 export class LinkService {
@@ -22,10 +22,14 @@ export class LinkService {
     return result[0] || null
   }
 
-  async incrementAccessCount(id: string, currentCount: number) {
-    await db.update(links)
-      .set({ accessCount: currentCount + 1 })
+  async incrementAccessCount(id: string) {
+    console.log(`[SERVICE] Incrementando accessCount para ID: ${id}`);
+    const result = await db.update(links)
+      .set({ accessCount: sql`${links.accessCount} + 1` })
       .where(eq(links.id, id))
+      .returning()
+    console.log(`[SERVICE] Resultado do update:`, result[0]);
+    return result[0];
   }
 
   async deleteLink(id: string) {

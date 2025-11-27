@@ -6,5 +6,6 @@ export async function linkRoutes(fastify: FastifyInstance) {
   fastify.get('/links', linkController.getAllLinks);
   fastify.get('/links/export/csv', linkController.exportLinksCSV);
   fastify.delete('/links/:id', linkController.deleteLink);
+  fastify.patch('/links/:id/increment', linkController.incrementLinkAccess);
   fastify.get('/:code', linkController.redirectToOriginalUrl);
 }

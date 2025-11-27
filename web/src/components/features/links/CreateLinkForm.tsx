@@ -1,13 +1,19 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createLinkSchema, CreateLinkSchema } from '../../../types/link'
 import { useLinks } from '../../../hooks/useLinks'
 import { Button } from '../../ui/Button'
 import { Input } from '../../ui/Input'
+import { Modal } from '../../ui/Modal'
 
 export function CreateLinkForm() {
   const { createLink } = useLinks()
-  
+  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: ''
+  })
+
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<CreateLinkSchema>({
     resolver: zodResolver(createLinkSchema),
   })
@@ -16,7 +22,12 @@ export function CreateLinkForm() {
     createLink.mutate(data, {
       onSuccess: () => reset(),
       onError: (error: any) => {
-        alert(error.response?.data?.message || 'Failed to create link')
+        const message = error.response?.data?.message || 'Erro ao criar link'
+        const friendlyMessage = message === 'Duplicated code'
+          ? 'Este link encurtado já existe. Por favor, escolha outro código.'
+          : message
+
+        setErrorModal({ isOpen: true, message: friendlyMessage })
       }
     })
   }
@@ -46,14 +57,26 @@ export function CreateLinkForm() {
             {errors.code && <span className="text-xs text-destructive">{errors.code.message}</span>}
         </div>
 
-        <Button 
-          type="submit" 
-          disabled={isSubmitting} 
+        <Button
+          type="submit"
+          disabled={isSubmitting}
           className="w-full h-12 text-base"
         >
           {isSubmitting ? 'Salvando...' : 'Salvar link'}
         </Button>
       </form>
+
+      <Modal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        title="Erro ao criar link"
+        description={errorModal.message}
+        footer={
+          <Button onClick={() => setErrorModal({ isOpen: false, message: '' })}>
+            OK
+          </Button>
+        }
+      />
     </div>
   )
 }

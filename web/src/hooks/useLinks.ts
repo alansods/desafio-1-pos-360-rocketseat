@@ -5,12 +5,15 @@ import { Link, CreateLinkSchema } from '../types/link'
 export function useLinks() {
   const queryClient = useQueryClient()
 
-  const { data: links, isLoading } = useQuery<Link[]>({
+  const { data: links, isLoading, refetch } = useQuery<Link[]>({
     queryKey: ['links'],
     queryFn: async () => {
+      console.log('[HOOK] Buscando links da API...')
       const response = await api.get('/links')
+      console.log('[HOOK] Links recebidos:', response.data.length, 'links')
       return response.data
     },
+    refetchOnWindowFocus: true,
   })
 
   const createLink = useMutation({
@@ -61,6 +64,7 @@ export function useLinks() {
     isLoading,
     createLink,
     deleteLink,
-    exportCsv
+    exportCsv,
+    refetch
   }
 }
