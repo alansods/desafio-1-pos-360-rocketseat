@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { Button } from './Button'
 
 interface ModalProps {
@@ -11,11 +11,32 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, description, children, footer }: ModalProps) {
-  if (!isOpen) return null
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true)
+      document.body.style.overflow = 'hidden'
+    } else {
+      const timer = setTimeout(() => setIsVisible(false), 150)
+      document.body.style.overflow = 'unset'
+      return () => clearTimeout(timer)
+    }
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
+
+  if (!isVisible) return null
 
   return (
     <div className="fixed left-0 -top-6 right-0 z-50 w-screen h-screen flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg space-y-4 animate-in fade-in zoom-in duration-200">
+      <div 
+        className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg space-y-4"
+        style={{
+          animation: isOpen ? 'scaleIn 0.15s ease-out' : 'scaleOut 0.15s ease-in'
+        }}
+      >
         <div className="space-y-2">
           <h3 className="text-lg font-bold">{title}</h3>
           {description && (
