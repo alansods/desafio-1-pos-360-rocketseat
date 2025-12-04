@@ -9,7 +9,7 @@ Projeto desenvolvido como parte do desafio da Pós-Graduação GoExpert da Rocke
 - **TypeScript** - Tipagem estática
 - **Vite** - Build tool e dev server
 - **TailwindCSS** - Framework CSS utilitário
-- **Shadcn/ui** - Componentes UI acessíveis
+- **Radix UI** - Componentes UI acessíveis (Alert Dialog, Slot)
 - **React Router DOM** - Roteamento client-side
 - **React Query (@tanstack/react-query)** - Gerenciamento de estado assíncrono
 - **React Hook Form** - Gerenciamento de formulários
@@ -17,6 +17,7 @@ Projeto desenvolvido como parte do desafio da Pós-Graduação GoExpert da Rocke
 - **Axios** - Cliente HTTP
 - **Sonner** - Notificações toast
 - **Lucide React** - Ícones
+- **Phosphor React** - Ícones adicionais
 
 ### Backend
 - **Node.js** - Runtime JavaScript
@@ -41,6 +42,7 @@ Projeto desenvolvido como parte do desafio da Pós-Graduação GoExpert da Rocke
   - [x] Validação de URL formatada
   - [x] Código customizado ou gerado aleatoriamente
   - [x] Validação de código único (não permite duplicatas)
+  - [x] Validação de formato do código (apenas alfanuméricos, hífen e underscore)
 - [x] **Listar todos os links**
   - [x] Ordenação por data de criação (mais recentes primeiro)
   - [x] Retorna: ID, código, URL original, contador de acessos, data de criação
@@ -86,9 +88,9 @@ Projeto desenvolvido como parte do desafio da Pós-Graduação GoExpert da Rocke
 
 - **Paleta de cores**: Azul primário (#4F46E5) com tema claro
 - **Tipografia**: Sistema de fontes nativas
-- **Componentes**: Baseados em Radix UI (acessibilidade)
+- **Componentes**: Baseados em Radix UI (acessibilidade) e componentes customizados
 - **Responsividade**: Mobile-first approach
-- **Ícones**: Lucide React e Phosphor Icons
+- **Ícones**: Lucide React e Phosphor React
 
 ## 🛠️ Como Rodar o Projeto
 
@@ -134,6 +136,7 @@ CLOUDFLARE_ACCOUNT_ID="seu_account_id"
 CLOUDFLARE_BUCKET="shortlinks-export-bucket"
 CLOUDFLARE_ACCESS_KEY_ID="sua_access_key"
 CLOUDFLARE_SECRET_ACCESS_KEY="sua_secret_key"
+CLOUDFLARE_PUBLIC_URL=""
 ```
 
 **Subir banco de dados e rodar migrations:**
@@ -235,7 +238,7 @@ desafio-1/
 │   │   ├── routes/           # Rotas (linkRoutes)
 │   │   ├── schemas/          # Schemas Zod
 │   │   ├── db/               # Database config e schema
-│   │   ├── utils/            # Utilitários
+│   │   ├── utils/            # Utilitários (csvUtils)
 │   │   └── server.ts         # Server principal
 │   ├── drizzle/              # Migrations
 │   ├── Dockerfile            # Docker config
@@ -257,7 +260,7 @@ npm run dev          # Servidor de desenvolvimento
 npm run build        # Build para produção
 npm run db:generate  # Gerar migrations
 npm run db:migrate   # Rodar migrations
-npm run test:r2      # Testar conexão com R2
+npm run start:migrate # Executar migrations e iniciar servidor
 ```
 
 ### Frontend
