@@ -12,7 +12,7 @@ export function LinkItem({ link, onDelete }: LinkItemProps) {
   const [copying, setCopying] = useState(false)
 
   // Ambas URLs devem ir pro backend para garantir incremento
-  const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3333'
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3333'
   const shortUrl = `${backendUrl}/${link.shortUrl}`
 
   const handleCopy = () => {
@@ -22,10 +22,6 @@ export function LinkItem({ link, onDelete }: LinkItemProps) {
   }
 
   const handleLinkClick = () => {
-    console.log('[FRONTEND] Link clicado:', link.shortUrl, 'AccessCount atual:', link.accessCount)
-    console.log('[FRONTEND] URL que será aberta:', shortUrl)
-    console.log('[FRONTEND] VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
-
     // React Query vai fazer refetch automaticamente quando voltar pra aba
     // graças ao refetchOnWindowFocus: true e refetchInterval
   }

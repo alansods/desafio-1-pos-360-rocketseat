@@ -11,10 +11,7 @@ export function useLinks() {
   const { data: links, isLoading, error, isError } = useQuery<Link[]>({
     queryKey: ['links'],
     queryFn: async () => {
-      console.log('[HOOK] Buscando links da API...')
       const response = await api.get('/links')
-      console.log('[HOOK] Links recebidos:', response.data.length, 'links')
-      console.log('[HOOK] Dados completos:', JSON.stringify(response.data, null, 2))
       return response.data
     },
     refetchOnWindowFocus: true,

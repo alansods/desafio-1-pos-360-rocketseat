@@ -23,12 +23,10 @@ export class LinkService {
   }
 
   async incrementAccessCount(id: string) {
-    console.log(`[SERVICE] Incrementando accessCount para ID: ${id}`);
     const result = await db.update(links)
       .set({ accessCount: sql`${links.accessCount} + 1` })
       .where(eq(links.id, id))
       .returning()
-    console.log(`[SERVICE] Resultado do update:`, result[0]);
     return result[0];
   }
 

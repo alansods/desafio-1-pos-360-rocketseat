@@ -45,20 +45,14 @@ export class LinkController {
   async redirectToOriginalUrl(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { code } = getLinkSchema.parse(request.params);
-      console.log(`[REDIRECT] Buscando link com código: ${code}`);
 
       const link = await linkService.getLinkByShortUrl(code);
 
       if (!link) {
-        console.log(`[REDIRECT] Link não encontrado: ${code}`);
         return reply.code(404).send({ message: 'Link not found' });
       }
 
-      console.log(`[REDIRECT] Link encontrado - ID: ${link.id}, AccessCount ANTES: ${link.accessCount}`);
       await linkService.incrementAccessCount(link.id);
-
-      const updatedLink = await linkService.getLinkByShortUrl(code);
-      console.log(`[REDIRECT] AccessCount DEPOIS: ${updatedLink?.accessCount}`);
 
       // Adicionar headers para evitar cache do redirect
       return reply
@@ -85,9 +79,7 @@ export class LinkController {
   async incrementLinkAccess(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = deleteLinkSchema.parse(request.params);
-      console.log(`[INCREMENT] Incrementando acesso para link ID: ${id}`);
       const updatedLink = await linkService.incrementAccessCount(id);
-      console.log(`[INCREMENT] Novo accessCount: ${updatedLink.accessCount}`);
       return reply.send({
         id: updatedLink.id,
         accessCount: updatedLink.accessCount
