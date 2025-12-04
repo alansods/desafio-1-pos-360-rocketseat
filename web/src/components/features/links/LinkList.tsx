@@ -47,15 +47,16 @@ export function LinkList() {
         <div className="text-center py-10 text-gray-400">Carregando...</div>
       ) : (
         <div>
-          {links?.map((link) => (
-            <LinkItem
-              key={link.id}
-              link={link}
-              onDelete={setDeleteConfirmationId}
-              onLinkClick={handleLinkClick}
-            />
-          ))}
-          {links?.length === 0 && (
+          {links && links.length > 0 ? (
+            links.map((link) => (
+              <LinkItem
+                key={link.id}
+                link={link}
+                onDelete={setDeleteConfirmationId}
+                onLinkClick={handleLinkClick}
+              />
+            ))
+          ) : (
             <div className="text-center py-10 text-gray-400">
               Nenhum link criado ainda.
             </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '../lib/api'
@@ -8,7 +8,7 @@ export function useLinks() {
   const queryClient = useQueryClient()
   const [isExporting, setIsExporting] = useState(false)
 
-  const { data: links, isLoading, refetch } = useQuery<Link[]>({
+  const { data: links, isLoading, refetch, error, isError } = useQuery<Link[]>({
     queryKey: ['links'],
     queryFn: async () => {
       console.log('[HOOK] Buscando links da API...')
@@ -18,12 +18,16 @@ export function useLinks() {
     },
     refetchOnWindowFocus: true,
     retry: 2,
-    onError: (error: any) => {
-      toast.error('Erro ao carregar links', {
-        description: error.response?.data?.message || 'Tente novamente mais tarde'
-      })
-    },
   })
+
+  // Tratamento de erro usando useEffect
+  useEffect(() => {
+    if (isError && error) {
+      toast.error('Erro ao carregar links', {
+        description: (error as any).response?.data?.message || 'Tente novamente mais tarde'
+      })
+    }
+  }, [isError, error])
 
   const createLink = useMutation({
     mutationFn: async (data: CreateLinkSchema) => {
