@@ -11,15 +11,12 @@ interface LinkItemProps {
 export function LinkItem({ link, onDelete }: LinkItemProps) {
   const [copying, setCopying] = useState(false)
 
-  // URL para clicar (vai pro frontend → Redirect.tsx → backend)
-  const clickableUrl = `/${link.shortUrl}`
-
-  // URL para copiar (deve ir direto pro backend em produção)
+  // Ambas URLs devem ir pro backend para garantir incremento
   const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3333'
-  const copyableUrl = `${backendUrl}/${link.shortUrl}`
+  const shortUrl = `${backendUrl}/${link.shortUrl}`
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(copyableUrl)
+    navigator.clipboard.writeText(shortUrl)
     setCopying(true)
     setTimeout(() => setCopying(false), 2000)
   }
@@ -35,7 +32,7 @@ export function LinkItem({ link, onDelete }: LinkItemProps) {
     <div className="flex items-center justify-between py-4 border-b border-gray-200 last:border-0">
       <div className="flex-1 min-w-0 space-y-1">
         <a
-          href={clickableUrl}
+          href={shortUrl}
           target="_blank"
           rel="noreferrer"
           className="font-medium text-primary hover:underline truncate block"
