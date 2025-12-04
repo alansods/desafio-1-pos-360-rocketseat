@@ -266,29 +266,6 @@ npm run preview      # Preview do build
 npm run lint         # Rodar linter
 ```
 
-## 🐛 Troubleshooting
-
-### Problema: Contador de acessos não atualiza
-
-**Causa**: Cache do navegador nos redirects 302
-
-**Solução**: Limpe o cache do navegador (Cmd+Shift+Delete) ou use modo anônimo. O backend já está configurado com headers anti-cache.
-
-### Problema: Erro ao exportar CSV
-
-**Causa**: Credenciais R2 inválidas ou ausentes
-
-**Solução**:
-1. Verifique as variáveis de ambiente no servidor
-2. Teste a conexão: `npm run test:r2`
-3. Confirme que o token R2 tem permissões "Admin Read & Write"
-
-### Problema: Frontend não conecta ao backend
-
-**Causa**: `VITE_API_BASE_URL` não configurada
-
-**Solução**: Configure a variável no Vercel apontando para a URL do Render
-
 ## 📝 Notas Técnicas
 
 ### Cache e Performance
@@ -315,4 +292,4 @@ ISC
 
 ## 👨‍💻 Autor
 
-Alan Santos - Pós-Graduação GoExpert Rocketseat
+Alan Santos - Pós-Graduação Tech Develop 360 - Faculdade de Tecnologia Rocketseat
