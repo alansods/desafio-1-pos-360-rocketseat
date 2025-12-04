@@ -7,7 +7,7 @@ export function Redirect() {
   useEffect(() => {
     if (code) {
       // Redirect to the backend endpoint which handles the actual redirection and analytics
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3333'
+      const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3333'
       window.location.href = `${backendUrl}/${code}`
     }
   }, [code])

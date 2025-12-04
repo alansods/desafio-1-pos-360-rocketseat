@@ -6,13 +6,8 @@ import { LinkItem } from './LinkItem'
 import { DeleteLinkModal } from './DeleteLinkModal'
 
 export function LinkList() {
-  const { links, isLoading, deleteLink, exportCsv, isExporting, refetch } = useLinks()
+  const { links, isLoading, deleteLink, exportCsv, isExporting } = useLinks()
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(null)
-
-  const handleLinkClick = () => {
-    console.log('[LINKLIST] handleLinkClick chamado, chamando refetch...')
-    refetch()
-  }
 
   const handleDelete = () => {
     if (deleteConfirmationId) {
@@ -53,7 +48,6 @@ export function LinkList() {
                 key={link.id}
                 link={link}
                 onDelete={setDeleteConfirmationId}
-                onLinkClick={handleLinkClick}
               />
             ))
           ) : (

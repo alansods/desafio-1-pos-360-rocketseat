@@ -6,10 +6,9 @@ import { Button } from '../../ui/Button'
 interface LinkItemProps {
   link: Link
   onDelete: (id: string) => void
-  onLinkClick?: () => void
 }
 
-export function LinkItem({ link, onDelete, onLinkClick }: LinkItemProps) {
+export function LinkItem({ link, onDelete }: LinkItemProps) {
   const [copying, setCopying] = useState(false)
   const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3333'
   const shortUrl = `${backendUrl}/${link.shortUrl}`
@@ -23,12 +22,8 @@ export function LinkItem({ link, onDelete, onLinkClick }: LinkItemProps) {
   const handleLinkClick = () => {
     console.log('[FRONTEND] Link clicado:', link.shortUrl, 'AccessCount atual:', link.accessCount)
 
-    // Atualiza a lista após um delay para pegar o incremento do backend
-    if (onLinkClick) {
-      setTimeout(() => {
-        onLinkClick()
-      }, 2000)
-    }
+    // React Query vai fazer refetch automaticamente quando voltar pra aba
+    // graças ao refetchOnWindowFocus: true e refetchInterval
   }
 
   return (

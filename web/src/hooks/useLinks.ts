@@ -8,7 +8,7 @@ export function useLinks() {
   const queryClient = useQueryClient()
   const [isExporting, setIsExporting] = useState(false)
 
-  const { data: links, isLoading, refetch, error, isError } = useQuery<Link[]>({
+  const { data: links, isLoading, error, isError } = useQuery<Link[]>({
     queryKey: ['links'],
     queryFn: async () => {
       console.log('[HOOK] Buscando links da API...')
@@ -17,6 +17,7 @@ export function useLinks() {
       return response.data
     },
     refetchOnWindowFocus: true,
+    refetchInterval: 10000, // Refetch a cada 10 segundos
     retry: 2,
   })
 
@@ -85,6 +86,5 @@ export function useLinks() {
     deleteLink,
     exportCsv,
     isExporting,
-    refetch
   }
 }
