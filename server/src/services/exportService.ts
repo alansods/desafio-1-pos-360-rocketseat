@@ -2,7 +2,8 @@ import { db } from '../db'
 import { links } from '../db/schema'
 import { desc } from 'drizzle-orm'
 import { escapeCsvField } from '../utils/csvUtils'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { randomUUID } from 'node:crypto'
 
 export class ExportService {
@@ -37,16 +38,27 @@ export class ExportService {
       },
     })
 
-    const fileName = `${randomUUID()}.csv`
+    const fileName = `shortlinks-export-${randomUUID()}.csv`
 
-    await r2.send(new PutObjectCommand({
+    const putCommand = new PutObjectCommand({
       Bucket: process.env.CLOUDFLARE_BUCKET,
       Key: fileName,
       Body: content,
-      ContentType: 'text/csv',
-    }))
+      ContentType: 'text/csv; charset=utf-8',
+      ContentDisposition: `attachment; filename="${fileName}"`,
+    })
 
-    return `${process.env.CLOUDFLARE_PUBLIC_URL}/${fileName}`
+    await r2.send(putCommand)
+
+    // Gerar URL assinada para download válida por 1 hora
+    const getCommand = new GetObjectCommand({
+      Bucket: process.env.CLOUDFLARE_BUCKET,
+      Key: fileName,
+    })
+
+    const signedUrl = await getSignedUrl(r2, getCommand, { expiresIn: 3600 })
+
+    return signedUrl
   }
 }
 
