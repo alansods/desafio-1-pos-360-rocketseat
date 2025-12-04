@@ -1,5 +1,5 @@
-import { CreateLinkForm } from '../components/features/links/CreateLinkForm'
-import { LinkList } from '../components/features/links/LinkList'
+import { CreateLinkForm } from "../components/features/links/CreateLinkForm";
+import { LinkList } from "../components/features/links/LinkList";
 
 export function Home() {
   return (
@@ -8,24 +8,28 @@ export function Home() {
         {/* Header */}
         <div className="flex items-center gap-2">
           <div className="bg-primary rounded-full p-1">
-             <img src="/logo.svg" alt="brev.ly" className="h-8 w-8" onError={(e) => e.currentTarget.style.display = 'none'} /> 
-             {/* Fallback if no logo image */}
-             <div className="h-6 w-6 border-2 border-white rounded-full flex items-center justify-center">
-                <div className="h-3 w-3 bg-white rounded-full"></div>
-             </div>
+            <img
+              src="/logo.png"
+              alt="brev.ly"
+              className="h-8 w-8"
+              onError={(e) => (e.currentTarget.style.display = "none")}
+            />
+            {/* Fallback if no logo image */}
+            <div className="h-6 w-6 border-2 border-white rounded-full flex items-center justify-center">
+              <div className="h-3 w-3 bg-white rounded-full"></div>
+            </div>
           </div>
           <span className="text-2xl font-bold text-primary">brev.ly</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            {/* Left Column: Create Link */}
-            <CreateLinkForm />
+          {/* Left Column: Create Link */}
+          <CreateLinkForm />
 
-            {/* Right Column: My Links */}
-            <LinkList />
+          {/* Right Column: My Links */}
+          <LinkList />
         </div>
       </div>
     </div>
-  )
+  );
 }
-
