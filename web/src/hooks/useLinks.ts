@@ -14,10 +14,13 @@ export function useLinks() {
       console.log('[HOOK] Buscando links da API...')
       const response = await api.get('/links')
       console.log('[HOOK] Links recebidos:', response.data.length, 'links')
+      console.log('[HOOK] Dados completos:', JSON.stringify(response.data, null, 2))
       return response.data
     },
     refetchOnWindowFocus: true,
     refetchInterval: 10000, // Refetch a cada 10 segundos
+    staleTime: 0, // Dados sempre considerados velhos
+    gcTime: 0, // Não manter cache
     retry: 2,
   })
 
