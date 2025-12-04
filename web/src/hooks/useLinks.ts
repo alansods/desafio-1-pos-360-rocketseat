@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { api } from '../lib/api'
 import { Link, CreateLinkSchema } from '../types/link'
 
 export function useLinks() {
   const queryClient = useQueryClient()
+  const [isExporting, setIsExporting] = useState(false)
 
   const { data: links, isLoading, refetch } = useQuery<Link[]>({
     queryKey: ['links'],
@@ -14,6 +17,12 @@ export function useLinks() {
       return response.data
     },
     refetchOnWindowFocus: true,
+    retry: 2,
+    onError: (error: any) => {
+      toast.error('Erro ao carregar links', {
+        description: error.response?.data?.message || 'Tente novamente mais tarde'
+      })
+    },
   })
 
   const createLink = useMutation({
@@ -31,22 +40,37 @@ export function useLinks() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['links'] })
+      toast.success('Link deletado com sucesso!')
+    },
+    onError: (error: any) => {
+      toast.error('Erro ao deletar link', {
+        description: error.response?.data?.message || 'Tente novamente'
+      })
     },
   })
 
   const exportCsv = async () => {
+    setIsExporting(true)
+    const loadingToast = toast.loading('Exportando CSV...')
+
     try {
       const response = await api.get('/links/export/csv')
-      
+
       // O backend agora retorna { url: "..." }
       if (response.data?.url) {
         window.open(response.data.url, '_blank')
+        toast.success('CSV exportado com sucesso!', { id: loadingToast })
       } else {
-        console.error('URL de exportação não encontrada')
+        toast.error('URL de exportação não encontrada', { id: loadingToast })
       }
     } catch (error: any) {
-      console.error('CSV Export Error:', error);
+      toast.error('Erro ao exportar CSV', {
+        id: loadingToast,
+        description: error.response?.data?.message || 'Tente novamente'
+      })
       throw error;
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -56,6 +80,7 @@ export function useLinks() {
     createLink,
     deleteLink,
     exportCsv,
+    isExporting,
     refetch
   }
 }

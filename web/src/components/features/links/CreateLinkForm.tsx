@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import { createLinkSchema, CreateLinkSchema } from '../../../types/link'
 import { useLinks } from '../../../hooks/useLinks'
 import { Button } from '../../ui/Button'
@@ -20,7 +21,10 @@ export function CreateLinkForm() {
 
   const onSubmit = (data: CreateLinkSchema) => {
     createLink.mutate(data, {
-      onSuccess: () => reset(),
+      onSuccess: () => {
+        reset()
+        toast.success('Link criado com sucesso!')
+      },
       onError: (error: any) => {
         const message = error.response?.data?.message || 'Erro ao criar link'
         const friendlyMessage = message === 'Duplicated code'

@@ -20,19 +20,14 @@ export function LinkItem({ link, onDelete, onLinkClick }: LinkItemProps) {
     setTimeout(() => setCopying(false), 2000)
   }
 
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
+  const handleLinkClick = () => {
     console.log('[FRONTEND] Link clicado:', link.shortUrl, 'AccessCount atual:', link.accessCount)
 
-    // Abre o link em nova aba
-    window.open(shortUrl, '_blank', 'noopener,noreferrer')
-
-    // Atualiza a lista (pode não refletir o incremento imediato pois o redirect acontece em outra aba)
+    // Atualiza a lista após um delay para pegar o incremento do backend
     if (onLinkClick) {
-      // Pequeno delay para tentar pegar o incremento do backend
       setTimeout(() => {
         onLinkClick()
-      }, 3000)
+      }, 2000)
     }
   }
 

@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Download } from 'lucide-react'
+import { Download, Loader2 } from 'lucide-react'
 import { useLinks } from '../../../hooks/useLinks'
 import { Button } from '../../ui/Button'
 import { LinkItem } from './LinkItem'
 import { DeleteLinkModal } from './DeleteLinkModal'
 
 export function LinkList() {
-  const { links, isLoading, deleteLink, exportCsv, refetch } = useLinks()
+  const { links, isLoading, deleteLink, exportCsv, isExporting, refetch } = useLinks()
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(null)
 
   const handleLinkClick = () => {
@@ -16,8 +16,11 @@ export function LinkList() {
 
   const handleDelete = () => {
     if (deleteConfirmationId) {
-      deleteLink.mutate(deleteConfirmationId)
-      setDeleteConfirmationId(null)
+      deleteLink.mutate(deleteConfirmationId, {
+        onSettled: () => {
+          setDeleteConfirmationId(null)
+        }
+      })
     }
   }
 
@@ -25,14 +28,18 @@ export function LinkList() {
     <div className="bg-white rounded-xl p-8 shadow-sm space-y-6">
       <div className="flex justify-between items-center border-b border-gray-200 pb-4">
         <h2 className="text-2xl font-bold text-gray-600">Meus links</h2>
-        <Button 
+        <Button
           variant="secondary"
-          onClick={exportCsv} 
-          disabled={!links || links.length === 0}
+          onClick={exportCsv}
+          disabled={!links || links.length === 0 || isExporting}
           className="h-9 px-3 gap-2"
         >
-          <Download className="w-4 h-4" />
-          Baixar CSV
+          {isExporting ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
+          {isExporting ? 'Exportando...' : 'Baixar CSV'}
         </Button>
       </div>
 
@@ -56,10 +63,11 @@ export function LinkList() {
         </div>
       )}
 
-      <DeleteLinkModal 
+      <DeleteLinkModal
         isOpen={!!deleteConfirmationId}
         onClose={() => setDeleteConfirmationId(null)}
         onConfirm={handleDelete}
+        isDeleting={deleteLink.isPending}
       />
     </div>
   )

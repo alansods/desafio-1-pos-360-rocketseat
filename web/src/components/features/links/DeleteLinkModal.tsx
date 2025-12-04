@@ -5,9 +5,10 @@ interface DeleteLinkModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
+  isDeleting?: boolean
 }
 
-export function DeleteLinkModal({ isOpen, onClose, onConfirm }: DeleteLinkModalProps) {
+export function DeleteLinkModal({ isOpen, onClose, onConfirm, isDeleting = false }: DeleteLinkModalProps) {
   return (
     <Modal
       isOpen={isOpen}
@@ -16,11 +17,20 @@ export function DeleteLinkModal({ isOpen, onClose, onConfirm }: DeleteLinkModalP
       description="Esta ação não pode ser desfeita. Isso excluirá permanentemente o link."
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} className="border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+          <Button
+            variant="ghost"
+            onClick={onClose}
+            disabled={isDeleting}
+            className="border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+          >
             Cancelar
           </Button>
-          <Button variant="destructive" onClick={onConfirm}>
-            Excluir
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isDeleting}
+          >
+            {isDeleting ? 'Excluindo...' : 'Excluir'}
           </Button>
         </>
       }
