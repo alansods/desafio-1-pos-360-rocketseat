@@ -60,7 +60,7 @@ export class LinkController {
       const updatedLink = await linkService.getLinkByShortUrl(code);
       console.log(`[REDIRECT] AccessCount DEPOIS: ${updatedLink?.accessCount}`);
 
-      return reply.redirect(301, link.originalUrl);
+      return reply.redirect(302, link.originalUrl);
     } catch (error) {
       console.error(`[REDIRECT] Erro:`, error);
       return reply.code(500).send({ message: 'Erro ao redirecionar' });
