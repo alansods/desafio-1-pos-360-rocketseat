@@ -4,29 +4,102 @@ Projeto desenvolvido como parte do desafio da Pós-Graduação GoExpert da Rocke
 
 ## 🚀 Tecnologias
 
-- **Frontend**: React, Vite, TailwindCSS, Shadcn/ui.
-- **Backend**: Node.js, Fastify, Drizzle ORM, PostgreSQL.
-- **Infraestrutura**: Pulumi (IaC), Cloudflare R2 (Storage), Docker.
+### Frontend
+- **React 19** - Biblioteca para construção de interfaces
+- **TypeScript** - Tipagem estática
+- **Vite** - Build tool e dev server
+- **TailwindCSS** - Framework CSS utilitário
+- **Shadcn/ui** - Componentes UI acessíveis
+- **React Router DOM** - Roteamento client-side
+- **React Query (@tanstack/react-query)** - Gerenciamento de estado assíncrono
+- **React Hook Form** - Gerenciamento de formulários
+- **Zod** - Validação de schemas
+- **Axios** - Cliente HTTP
+- **Sonner** - Notificações toast
+- **Lucide React** - Ícones
 
-## ✅ Funcionalidades e Requisitos
+### Backend
+- **Node.js** - Runtime JavaScript
+- **TypeScript** - Tipagem estática
+- **Fastify** - Framework web performático
+- **Drizzle ORM** - ORM type-safe para TypeScript
+- **PostgreSQL** - Banco de dados relacional
+- **Zod** - Validação de dados
+- **AWS SDK (S3)** - Integração com Cloudflare R2
 
-- [x] **Criar um link**
-    - [x] Validação de URL formatada
-    - [x] Validação de código único (gerado aleatoriamente ou customizado)
-- [x] **Deletar um link**
-- [x] **Redirecionamento** (Obter URL original via código encurtado)
-- [x] **Listar todas as URLs**
-- [x] **Contagem de acessos** (Incremento ao acessar o link encurtado)
+### Infraestrutura
+- **Pulumi** - Infrastructure as Code
+- **Cloudflare R2** - Object storage para arquivos CSV
+- **Docker** - Containerização
+- **Render** - Hospedagem do backend
+- **Vercel** - Hospedagem do frontend
+
+## ✅ Funcionalidades Implementadas
+
+### Backend
+- [x] **Criar link encurtado**
+  - [x] Validação de URL formatada
+  - [x] Código customizado ou gerado aleatoriamente
+  - [x] Validação de código único (não permite duplicatas)
+- [x] **Listar todos os links**
+  - [x] Ordenação por data de criação (mais recentes primeiro)
+  - [x] Retorna: ID, código, URL original, contador de acessos, data de criação
+- [x] **Deletar link**
+- [x] **Redirecionamento**
+  - [x] Redirect 302 para URL original
+  - [x] Headers anti-cache para garantir incremento correto
+- [x] **Contagem de acessos**
+  - [x] Incremento automático a cada acesso
+  - [x] Query SQL otimizada (atomic increment)
 - [x] **Exportação de dados**
-    - [x] Exportar links em CSV
-    - [x] Upload automático para CDN (Cloudflare R2)
-    - [x] Geração de nome aleatório e único para o arquivo
-    - [x] Listagem performática
-    - [x] Campos: URL original, URL encurtada, acessos, data de criação
+  - [x] Geração de arquivo CSV
+  - [x] Upload automático para Cloudflare R2
+  - [x] Presigned URLs (válidas por 1 hora)
+  - [x] Nome único gerado com UUID
+  - [x] Campos: ID, Code, Original URL, Access Count, Created At
+
+### Frontend
+- [x] **Interface de criação de links**
+  - [x] Input para URL original
+  - [x] Input opcional para código customizado
+  - [x] Validação em tempo real
+  - [x] Feedback de erros (modal + toast)
+- [x] **Listagem de links**
+  - [x] Exibição de todos os links criados
+  - [x] Contador de acessos em tempo real
+  - [x] Auto-refresh a cada 10 segundos
+  - [x] Refresh ao voltar para a aba (window focus)
+- [x] **Ações sobre links**
+  - [x] Copiar link encurtado (clipboard)
+  - [x] Deletar link (com modal de confirmação)
+  - [x] Exportar todos os links em CSV
+- [x] **Sistema de notificações**
+  - [x] Toast de sucesso/erro para todas as operações
+  - [x] Loading states em botões e operações
+- [x] **UX/UI**
+  - [x] Design responsivo
+  - [x] Animações e transições suaves
+  - [x] Estados de loading visual
+  - [x] Tratamento de erros amigável
+
+## 🎨 Design e Layout
+
+- **Paleta de cores**: Azul primário (#4F46E5) com tema claro
+- **Tipografia**: Sistema de fontes nativas
+- **Componentes**: Baseados em Radix UI (acessibilidade)
+- **Responsividade**: Mobile-first approach
+- **Ícones**: Lucide React e Phosphor Icons
 
 ## 🛠️ Como Rodar o Projeto
 
+### Pré-requisitos
+- Node.js 18+
+- PostgreSQL
+- Conta Cloudflare (para R2 storage)
+- npm ou yarn
+
 ### 1. Infraestrutura (Opcional - Para Exportação CSV)
+
 Este projeto usa o **Pulumi** para provisionar um bucket no Cloudflare R2.
 
 ```bash
@@ -37,6 +110,7 @@ pulumi config set accountId <SEU_CLOUDFLARE_ACCOUNT_ID>
 export CLOUDFLARE_API_TOKEN=<SEU_TOKEN_R2_ADMIN>
 pulumi up
 ```
+
 *Após o deploy, copie o nome do bucket para o `.env` do servidor.*
 
 ### 2. Backend
@@ -47,15 +121,32 @@ npm install
 
 # Configurar variáveis de ambiente
 cp .env.example .env
-# Edite o .env com suas credenciais do Banco e Cloudflare
+```
 
-# Subir o banco de dados (Docker)
+**Edite o `.env` com suas credenciais:**
+
+```env
+PORT=3333
+DATABASE_URL="postgresql://docker:docker@localhost:5432/shortlinks"
+
+# Cloudflare R2 Configuration
+CLOUDFLARE_ACCOUNT_ID="seu_account_id"
+CLOUDFLARE_BUCKET="shortlinks-export-bucket"
+CLOUDFLARE_ACCESS_KEY_ID="sua_access_key"
+CLOUDFLARE_SECRET_ACCESS_KEY="sua_secret_key"
+```
+
+**Subir banco de dados e rodar migrations:**
+
+```bash
+# Subir PostgreSQL com Docker
 docker-compose up -d
 
-# Rodar migrations
+# Gerar e rodar migrations
+npm run db:generate
 npm run db:migrate
 
-# Iniciar servidor
+# Iniciar servidor de desenvolvimento
 npm run dev
 ```
 
@@ -67,18 +158,161 @@ npm install
 
 # Configurar variáveis de ambiente
 cp .env.example .env
-# Defina VITE_API_BASE_URL="http://localhost:3333"
+```
 
-# Iniciar frontend
+**Edite o `.env`:**
+
+```env
+VITE_API_BASE_URL=http://localhost:3333
+```
+
+**Iniciar frontend:**
+
+```bash
 npm run dev
 ```
 
+Acesse: `http://localhost:5173`
+
 ## 🐳 Docker (Produção)
 
-O backend possui um `Dockerfile` otimizado (multi-stage build) pronto para deploy em serviços como Render, Railway ou AWS App Runner.
+### Backend
+
+O backend possui um `Dockerfile` otimizado (multi-stage build):
 
 ```bash
 cd server
 docker build -t url-shortener-backend .
 docker run -p 3333:3333 --env-file .env url-shortener-backend
 ```
+
+## 🚀 Deploy
+
+### Backend (Render)
+
+1. Conecte seu repositório no Render
+2. Configure as variáveis de ambiente:
+   - `DATABASE_URL`
+   - `CLOUDFLARE_ACCOUNT_ID`
+   - `CLOUDFLARE_BUCKET`
+   - `CLOUDFLARE_ACCESS_KEY_ID`
+   - `CLOUDFLARE_SECRET_ACCESS_KEY`
+3. Build command: `npm run build`
+4. Start command: `npm run start:migrate`
+
+### Frontend (Vercel)
+
+1. Conecte seu repositório no Vercel
+2. Configure a variável de ambiente:
+   - `VITE_API_BASE_URL` = URL do backend no Render
+3. Build command: `npm run build`
+4. Output directory: `dist`
+
+## 📁 Estrutura do Projeto
+
+```
+desafio-1/
+├── web/                      # Frontend React
+│   ├── src/
+│   │   ├── components/       # Componentes React
+│   │   │   ├── features/     # Componentes de features
+│   │   │   │   └── links/    # Componentes relacionados a links
+│   │   │   └── ui/           # Componentes UI reutilizáveis
+│   │   ├── hooks/            # Custom hooks (useLinks)
+│   │   ├── lib/              # Configurações (axios, etc)
+│   │   ├── pages/            # Páginas (Home, Redirect, NotFound)
+│   │   ├── types/            # TypeScript types
+│   │   └── App.tsx           # App principal
+│   ├── public/               # Arquivos estáticos
+│   └── package.json
+│
+├── server/                   # Backend Node.js
+│   ├── src/
+│   │   ├── controllers/      # Controllers (linkController)
+│   │   ├── services/         # Services (linkService, exportService)
+│   │   ├── routes/           # Rotas (linkRoutes)
+│   │   ├── schemas/          # Schemas Zod
+│   │   ├── db/               # Database config e schema
+│   │   ├── utils/            # Utilitários
+│   │   └── server.ts         # Server principal
+│   ├── drizzle/              # Migrations
+│   ├── Dockerfile            # Docker config
+│   └── package.json
+│
+├── infra/                    # Infrastructure as Code
+│   ├── index.ts              # Pulumi config
+│   └── package.json
+│
+├── docker-compose.yml        # PostgreSQL local
+└── README.md
+```
+
+## 🔧 Scripts Úteis
+
+### Backend
+```bash
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build para produção
+npm run db:generate  # Gerar migrations
+npm run db:migrate   # Rodar migrations
+npm run test:r2      # Testar conexão com R2
+```
+
+### Frontend
+```bash
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build para produção
+npm run preview      # Preview do build
+npm run lint         # Rodar linter
+```
+
+## 🐛 Troubleshooting
+
+### Problema: Contador de acessos não atualiza
+
+**Causa**: Cache do navegador nos redirects 302
+
+**Solução**: Limpe o cache do navegador (Cmd+Shift+Delete) ou use modo anônimo. O backend já está configurado com headers anti-cache.
+
+### Problema: Erro ao exportar CSV
+
+**Causa**: Credenciais R2 inválidas ou ausentes
+
+**Solução**:
+1. Verifique as variáveis de ambiente no servidor
+2. Teste a conexão: `npm run test:r2`
+3. Confirme que o token R2 tem permissões "Admin Read & Write"
+
+### Problema: Frontend não conecta ao backend
+
+**Causa**: `VITE_API_BASE_URL` não configurada
+
+**Solução**: Configure a variável no Vercel apontando para a URL do Render
+
+## 📝 Notas Técnicas
+
+### Cache e Performance
+- React Query com `refetchInterval` de 10 segundos
+- `refetchOnWindowFocus` habilitado
+- `staleTime: 0` e `gcTime: 0` para dados sempre frescos
+- Backend com headers anti-cache nos redirects
+
+### Segurança
+- Validação de dados com Zod no backend e frontend
+- Sanitização de inputs
+- CORS configurado
+- Presigned URLs com expiração de 1 hora
+- Credenciais em variáveis de ambiente
+
+### Database
+- Migrations gerenciadas pelo Drizzle Kit
+- Atomic increment para contador de acessos
+- Índice único no campo `code`
+
+## 📄 Licença
+
+ISC
+
+## 👨‍💻 Autor
+
+Alan Santos - Pós-Graduação GoExpert Rocketseat

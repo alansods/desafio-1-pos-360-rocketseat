@@ -38,7 +38,10 @@ export class ExportService {
       },
     })
 
-    const fileName = `shortlinks-export-${randomUUID()}.csv`
+    const now = new Date()
+    const dateStr = now.toISOString().split('T')[0] // YYYY-MM-DD
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-') // HH-MM-SS
+    const fileName = `brev.ly-links-${dateStr}_${timeStr}.csv`
 
     const putCommand = new PutObjectCommand({
       Bucket: process.env.CLOUDFLARE_BUCKET,
