@@ -1,0 +1,3 @@
+name: desafio-1-infra
+runtime: nodejs
+description: Infrastructure for URL Shortener (Cloudflare R2)

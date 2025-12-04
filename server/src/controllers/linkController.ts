@@ -96,13 +96,12 @@ export class LinkController {
   async exportLinksCSV(request: FastifyRequest, reply: FastifyReply) {
     try {
       const csvContent = await exportService.generateCsvContent();
+      const fileUrl = await exportService.uploadToStorage(csvContent);
 
-      return reply
-        .header('Content-Type', 'text/csv; charset=utf-8')
-        .header('Content-Disposition', 'attachment; filename="links.csv"')
-        .send(csvContent);
+      return reply.send({ url: fileUrl });
     } catch (error: any) {
-      return reply.code(500).send({ message: error.message });
+      console.error('[EXPORT CSV] Erro:', error);
+      return reply.code(500).send({ message: 'Erro ao exportar CSV' });
     }
   }
 }
