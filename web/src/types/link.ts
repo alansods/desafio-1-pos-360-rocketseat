@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
 export const createLinkSchema = z.object({
-  code: z.string().min(3, "Code must be at least 3 characters"),
-  url: z.string().url("Invalid URL"),
+  code: z.string().min(3, "O código deve ter pelo menos 3 caracteres"),
+  url: z.string().url("Informe uma URL válida"),
 })
 
 export type CreateLinkSchema = z.infer<typeof createLinkSchema>
