@@ -36,23 +36,14 @@ export function useLinks() {
 
   const exportCsv = async () => {
     try {
-      const response = await api.get('/links/export/csv', {
-        responseType: 'text',
-        headers: {
-          'Accept': 'text/csv',
-        }
-      })
-
-      const dataUrl = 'data:text/csv;charset=utf-8,' + encodeURIComponent(response.data);
+      const response = await api.get('/links/export/csv')
       
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = 'links.csv';
-      link.style.display = 'none';
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // O backend agora retorna { url: "..." }
+      if (response.data?.url) {
+        window.open(response.data.url, '_blank')
+      } else {
+        console.error('URL de exportação não encontrada')
+      }
     } catch (error: any) {
       console.error('CSV Export Error:', error);
       throw error;

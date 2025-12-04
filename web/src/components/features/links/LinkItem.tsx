@@ -32,7 +32,7 @@ export function LinkItem({ link, onDelete, onLinkClick }: LinkItemProps) {
       // Pequeno delay para tentar pegar o incremento do backend
       setTimeout(() => {
         onLinkClick()
-      }, 1000)
+      }, 3000)
     }
   }
 
