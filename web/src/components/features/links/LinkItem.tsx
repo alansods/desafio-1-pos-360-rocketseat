@@ -1,30 +1,31 @@
-import { useState } from 'react'
-import { Copy, Trash2 } from 'lucide-react'
-import { Link } from '../../../types/link'
-import { Button } from '../../ui/Button'
+import { useState } from "react";
+import { Copy, Trash2 } from "lucide-react";
+import { Link } from "../../../types/link";
+import { Button } from "../../ui/Button";
 
 interface LinkItemProps {
-  link: Link
-  onDelete: (id: string) => void
+  link: Link;
+  onDelete: (id: string) => void;
 }
 
 export function LinkItem({ link, onDelete }: LinkItemProps) {
-  const [copying, setCopying] = useState(false)
+  const [copying, setCopying] = useState(false);
 
-  // Ambas URLs devem ir pro backend para garantir incremento
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3333'
-  const shortUrl = `${backendUrl}/${link.shortUrl}`
+  // Link encurtado aponta para o frontend, que redireciona para o backend
+  const frontendUrl =
+    import.meta.env.VITE_FRONTEND_URL || window.location.origin;
+  const shortUrl = `${frontendUrl}/${link.shortUrl}`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(shortUrl)
-    setCopying(true)
-    setTimeout(() => setCopying(false), 2000)
-  }
+    navigator.clipboard.writeText(shortUrl);
+    setCopying(true);
+    setTimeout(() => setCopying(false), 2000);
+  };
 
   const handleLinkClick = () => {
     // React Query vai fazer refetch automaticamente quando voltar pra aba
     // graças ao refetchOnWindowFocus: true e refetchInterval
-  }
+  };
 
   return (
     <div className="flex items-center justify-between py-4 border-b border-gray-200 last:border-0">
@@ -47,17 +48,19 @@ export function LinkItem({ link, onDelete }: LinkItemProps) {
 
       <div className="flex items-center justify-between gap-4 text-sm text-gray-400">
         <div className="flex gap-2 items-center">
-          <span className="whitespace-nowrap mr-2">{link.accessCount} acessos</span>
+          <span className="whitespace-nowrap mr-2">
+            {link.accessCount} acessos
+          </span>
 
-          <Button 
-            variant="secondary"
-            size="icon"
-            onClick={handleCopy}
-          >
-            {copying ? <span className="text-xs font-bold text-green-600">✓</span> : <Copy className="w-4 h-4" />}
+          <Button variant="secondary" size="icon" onClick={handleCopy}>
+            {copying ? (
+              <span className="text-xs font-bold text-green-600">✓</span>
+            ) : (
+              <Copy className="w-4 h-4" />
+            )}
           </Button>
-          
-          <Button 
+
+          <Button
             variant="secondary"
             size="icon"
             onClick={() => onDelete(link.id)}
@@ -67,5 +70,5 @@ export function LinkItem({ link, onDelete }: LinkItemProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

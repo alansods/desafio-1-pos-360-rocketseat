@@ -163,7 +163,8 @@ cp .env.example .env
 **Edite o `.env`:**
 
 ```env
-VITE_API_BASE_URL=http://localhost:3333
+VITE_FRONTEND_URL=http://localhost:5173
+VITE_BACKEND_URL=http://localhost:3333
 ```
 
 **Iniciar frontend:**
@@ -203,8 +204,9 @@ docker run -p 3333:3333 --env-file .env url-shortener-backend
 ### Frontend (Vercel)
 
 1. Conecte seu repositório no Vercel
-2. Configure a variável de ambiente:
-   - `VITE_API_BASE_URL` = URL do backend no Render
+2. Configure as variáveis de ambiente:
+   - `VITE_FRONTEND_URL` = URL do frontend no Vercel (ex: https://seu-app.vercel.app)
+   - `VITE_BACKEND_URL` = URL do backend no Render
 3. Build command: `npm run build`
 4. Output directory: `dist`
 
