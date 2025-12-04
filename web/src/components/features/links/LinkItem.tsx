@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Copy, Trash2 } from 'lucide-react'
 import { Link } from '../../../types/link'
 import { Button } from '../../ui/Button'
-import { api } from '../../../lib/api'
 
 interface LinkItemProps {
   link: Link
@@ -21,28 +20,19 @@ export function LinkItem({ link, onDelete, onLinkClick }: LinkItemProps) {
     setTimeout(() => setCopying(false), 2000)
   }
 
-  const handleLinkClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     console.log('[FRONTEND] Link clicado:', link.shortUrl, 'AccessCount atual:', link.accessCount)
 
-    try {
-      // Incrementa o contador via API
-      console.log('[FRONTEND] Chamando API para incrementar contador...')
-      await api.patch(`/links/${link.id}/increment`)
-      console.log('[FRONTEND] Contador incrementado com sucesso!')
+    // Abre o link em nova aba
+    window.open(shortUrl, '_blank', 'noopener,noreferrer')
 
-      // Atualiza a lista
-      if (onLinkClick) {
+    // Atualiza a lista (pode não refletir o incremento imediato pois o redirect acontece em outra aba)
+    if (onLinkClick) {
+      // Pequeno delay para tentar pegar o incremento do backend
+      setTimeout(() => {
         onLinkClick()
-      }
-      
-
-      // Abre o link em nova aba
-      window.open(shortUrl, '_blank', 'noopener,noreferrer')
-    } catch (error) {
-      console.error('[FRONTEND] Erro ao incrementar contador:', error)
-      // Mesmo com erro, abre o link
-      window.open(shortUrl, '_blank', 'noopener,noreferrer')
+      }, 1000)
     }
   }
 
