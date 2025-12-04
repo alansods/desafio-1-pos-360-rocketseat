@@ -23,6 +23,8 @@ export function LinkItem({ link, onDelete }: LinkItemProps) {
 
   const handleLinkClick = () => {
     console.log('[FRONTEND] Link clicado:', link.shortUrl, 'AccessCount atual:', link.accessCount)
+    console.log('[FRONTEND] URL que será aberta:', shortUrl)
+    console.log('[FRONTEND] VITE_API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
 
     // React Query vai fazer refetch automaticamente quando voltar pra aba
     // graças ao refetchOnWindowFocus: true e refetchInterval
