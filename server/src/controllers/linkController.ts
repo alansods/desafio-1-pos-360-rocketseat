@@ -60,7 +60,12 @@ export class LinkController {
       const updatedLink = await linkService.getLinkByShortUrl(code);
       console.log(`[REDIRECT] AccessCount DEPOIS: ${updatedLink?.accessCount}`);
 
-      return reply.redirect(302, link.originalUrl);
+      // Adicionar headers para evitar cache do redirect
+      return reply
+        .header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        .header('Pragma', 'no-cache')
+        .header('Expires', '0')
+        .redirect(302, link.originalUrl);
     } catch (error) {
       console.error(`[REDIRECT] Erro:`, error);
       return reply.code(500).send({ message: 'Erro ao redirecionar' });
