@@ -11,7 +11,7 @@ interface LinkItemProps {
 
 export function LinkItem({ link, onDelete, onLinkClick }: LinkItemProps) {
   const [copying, setCopying] = useState(false)
-  const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3333'
+  const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3333'
   const shortUrl = `${backendUrl}/${link.shortUrl}`
 
   const handleCopy = () => {
