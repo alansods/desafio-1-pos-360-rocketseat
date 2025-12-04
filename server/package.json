@@ -8,6 +8,7 @@
     "build": "tsc",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "start:migrate": "npm run db:migrate && node dist/server.js",
     "test:r2": "tsx src/test-r2.ts"
   },
   "keywords": [],
