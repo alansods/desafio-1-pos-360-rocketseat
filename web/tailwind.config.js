@@ -7,40 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "#2C46B1", // Blue
-          foreground: "#FFFFFF",
-          dark: "#2C4091", // Blue Dark
+        // Blue
+        blue: {
+          base: "#2C46B1",
+          dark: "#2C4091",
         },
-        secondary: {
-          DEFAULT: "#E4E6EC", // Gray 200
-          foreground: "#4D505C", // Gray 500
-        },
-        destructive: {
-          DEFAULT: "#B12C4D", // Red
-          foreground: "#FFFFFF",
-        },
-        muted: {
-          DEFAULT: "#F9F9FB", // Gray 100
-          foreground: "#74798B", // Gray 400
-        },
-        accent: {
-          DEFAULT: "#F9F9FB", // Gray 100
-          foreground: "#1F2025", // Gray 600
-        },
-        popover: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#1F2025",
-        },
-        card: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#1F2025",
-        },
+        // Grayscale
+        white: "#FFFFFF",
         gray: {
           100: "#F9F9FB",
           200: "#E4E6EC",
@@ -48,7 +21,9 @@ export default {
           400: "#74798B",
           500: "#4D505C",
           600: "#1F2025",
-        }
+        },
+        // Feedback
+        danger: "#B12C4D",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -57,6 +32,18 @@ export default {
       },
       fontFamily: {
         sans: ["Open Sans", "sans-serif"],
+      },
+      fontSize: {
+        'xs': ['10px', { lineHeight: '14px', letterSpacing: '0' }],
+        'sm': ['12px', { lineHeight: '16px', letterSpacing: '0' }],
+        'md': ['14px', { lineHeight: '18px', letterSpacing: '0' }],
+        'lg': ['18px', { lineHeight: '24px', letterSpacing: '0' }],
+        'xl': ['24px', { lineHeight: '32px', letterSpacing: '0' }],
+      },
+      fontWeight: {
+        normal: '400',
+        semibold: '600',
+        bold: '700',
       },
     },
   },

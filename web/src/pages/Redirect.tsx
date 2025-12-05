@@ -15,9 +15,7 @@ export function Redirect() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
-      <p className="text-xl text-muted-foreground animate-pulse">
-        Redirecting...
-      </p>
+      <p className="text-xl text-gray-400 animate-pulse">Redirecting...</p>
     </div>
   );
 }

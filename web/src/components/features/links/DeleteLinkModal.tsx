@@ -1,14 +1,19 @@
-import { Button } from '../../ui/Button'
-import { Modal } from '../../ui/Modal'
+import { Button } from "../../ui/Button";
+import { Modal } from "../../ui/Modal";
 
 interface DeleteLinkModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  isDeleting?: boolean
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isDeleting?: boolean;
 }
 
-export function DeleteLinkModal({ isOpen, onClose, onConfirm, isDeleting = false }: DeleteLinkModalProps) {
+export function DeleteLinkModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  isDeleting = false,
+}: DeleteLinkModalProps) {
   return (
     <Modal
       isOpen={isOpen}
@@ -21,7 +26,7 @@ export function DeleteLinkModal({ isOpen, onClose, onConfirm, isDeleting = false
             variant="ghost"
             onClick={onClose}
             disabled={isDeleting}
-            className="border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+            className="rounded-lg bg-white hover:bg-gray-100 hover:text-gray-600"
           >
             Cancelar
           </Button>
@@ -30,10 +35,10 @@ export function DeleteLinkModal({ isOpen, onClose, onConfirm, isDeleting = false
             onClick={onConfirm}
             disabled={isDeleting}
           >
-            {isDeleting ? 'Excluindo...' : 'Excluir'}
+            {isDeleting ? "Excluindo..." : "Excluir"}
           </Button>
         </>
       }
     />
-  )
+  );
 }

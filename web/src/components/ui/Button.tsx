@@ -1,36 +1,55 @@
-import { ButtonHTMLAttributes, forwardRef } from 'react'
-import { twMerge } from 'tailwind-merge'
+import { ButtonHTMLAttributes, forwardRef } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'destructive' | 'ghost'
-  size?: 'default' | 'sm' | 'icon'
+  variant?: "primary" | "secondary" | "destructive" | "ghost";
+  size?: "default" | "sm" | "icon";
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'default', ...props }, ref) => {
-    const baseStyles = "inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-    
-    const variants = {
-      primary: "bg-primary text-primary-foreground hover:bg-primary/90",
-      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 bg-gray-200 text-gray-600 hover:bg-gray-300",
-      destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-      ghost: "hover:bg-accent hover:text-accent-foreground"
+  ({ className, variant = "primary", size = "default", ...props }, ref) => {
+    // Se for icon button, usa classe específica
+    if (size === "icon") {
+      const iconClass =
+        variant === "secondary"
+          ? "btn-icon btn-size-icon"
+          : "btn-primary btn-size-icon";
+      return (
+        <button
+          ref={ref}
+          className={twMerge(iconClass, className)}
+          {...props}
+        />
+      );
     }
 
-    const sizes = {
-      default: "h-10 px-4 py-2",
-      sm: "h-9 rounded-md px-3",
-      icon: "h-8 w-8"
-    }
+    // Botões normais
+    const variantClasses = {
+      primary: "btn-primary",
+      secondary: "btn-secondary",
+      destructive:
+        "btn-base bg-danger text-white rounded-lg hover:bg-danger/90 disabled:opacity-50",
+      ghost: "btn-base hover:bg-gray-200 text-gray-500",
+    };
+
+    const sizeClasses = {
+      default: "btn-size-default",
+      sm: "btn-size-sm",
+      icon: "btn-size-icon",
+    };
 
     return (
       <button
         ref={ref}
-        className={twMerge(baseStyles, variants[variant], sizes[size], className)}
+        className={twMerge(
+          variantClasses[variant],
+          sizeClasses[size],
+          className
+        )}
         {...props}
       />
-    )
+    );
   }
-)
+);
 
-Button.displayName = "Button"
+Button.displayName = "Button";

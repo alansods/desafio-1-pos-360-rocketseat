@@ -7,7 +7,11 @@ const app = fastify({
 })
 
 app.register(cors, {
-  origin: '*',
+  origin: [
+    'http://localhost:5173',
+    'https://desafio-1-pos-360-rocketseat-f36wv54qx-alansods-projects.vercel.app',
+    /\.vercel\.app$/,
+  ],
 })
 
 app.register(linkRoutes)

@@ -1,45 +1,94 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  /* Input Styles - Figma: borderRadius 8px, height 48px */
+  .input-base {
+    @apply flex h-12 w-full rounded-lg border bg-white px-4 py-2 text-sm text-gray-600 placeholder:text-gray-400;
+    @apply focus-visible:outline-none focus-visible:border-blue-base focus-visible:border-[1.5px];
+    @apply disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .input-default {
+    @apply input-base border-gray-300;
+  }
+  
+  .input-error {
+    @apply input-base border-danger border-[1.5px] focus-visible:border-danger;
+  }
+  
+  .input-label {
+    @apply text-xs font-normal text-gray-500 uppercase;
+  }
+  
+  .input-error-message {
+    @apply flex items-center gap-2 text-sm text-gray-500;
+  }
+
+  /* Button Styles */
+  .btn-base {
+    @apply inline-flex items-center justify-center whitespace-nowrap font-semibold;
+    @apply transition-colors focus-visible:outline-none;
+    @apply disabled:pointer-events-none;
+  }
+
+  /* Button Primary - Figma: bg blue-base, borderRadius 8px, height 48px */
+  .btn-primary {
+    @apply btn-base bg-blue-base text-white rounded-lg;
+    @apply hover:bg-blue-dark;
+    @apply disabled:opacity-50;
+  }
+
+  /* Button Secondary - Figma: bg gray-200, borderRadius 4px, height 32px */
+  .btn-secondary {
+    @apply btn-base bg-gray-200 text-gray-500 rounded text-sm;
+    @apply hover:ring-1 hover:ring-inset hover:ring-blue-base;
+    @apply disabled:opacity-50;
+  }
+
+  .btn-secondary svg {
+    @apply text-gray-600;
+  }
+
+  .btn-secondary:hover svg {
+    @apply text-gray-600;
+  }
+
+  .btn-secondary:disabled svg {
+    @apply text-gray-400;
+  }
+
+  /* Icon Button - Figma: bg gray-200, borderRadius 4px, size 32x32 */
+  .btn-icon {
+    @apply btn-base bg-gray-200 text-gray-500 rounded;
+    @apply hover:ring-1 hover:ring-inset hover:ring-blue-base;
+    @apply disabled:opacity-50;
+  }
+
+  /* Button Sizes */
+  .btn-size-default {
+    @apply h-12 px-5 py-0;
+  }
+
+  .btn-size-sm {
+    @apply h-8 px-3 gap-2 text-sm;
+  }
+
+  .btn-size-icon {
+    @apply h-8 w-8 p-0;
+  }
+}
+
 @layer base {
   :root {
-    --background: 240 5% 96%; /* #F5F5F7 - Light Gray Background */
-    --foreground: 222 47% 11%; /* #020817 */
-
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-
-    --primary: 228 60% 43%; /* #2C46B1 */
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11%;
-
-    --destructive: 345 60% 43%; /* #B12C4D */
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 228 60% 43%;
-
-    --radius: 0.5rem;
+    --radius: 8px;
   }
 }
 
 body {
-  @apply bg-background text-foreground antialiased;
+  @apply bg-gray-200 text-gray-600 antialiased font-sans;
+  font-family: 'Open Sans', sans-serif;
 }
 
 @keyframes scaleIn {
