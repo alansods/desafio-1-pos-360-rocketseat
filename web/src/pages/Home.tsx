@@ -7,18 +7,7 @@ export function Home() {
       <div className="w-full max-w-6xl space-y-8">
         {/* Header */}
         <div className="flex items-center gap-2">
-          <div className="bg-primary rounded-full p-1">
-            <img
-              src="/logo.png"
-              alt="brev.ly"
-              className="h-8 w-8"
-              onError={(e) => (e.currentTarget.style.display = "none")}
-            />
-            {/* Fallback if no logo image */}
-            <div className="h-6 w-6 border-2 border-white rounded-full flex items-center justify-center">
-              <div className="h-3 w-3 bg-white rounded-full"></div>
-            </div>
-          </div>
+          <img src="/logo.png" alt="brev.ly" className="h-10 w-auto" />
           <span className="text-2xl font-bold text-primary">brev.ly</span>
         </div>
 
