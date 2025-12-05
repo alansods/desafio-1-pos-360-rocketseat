@@ -72,7 +72,7 @@ export function CreateLinkForm() {
             <input
               className={twMerge(
                 errors.code ? "input-error" : "input-default",
-                "pl-[4.5rem]"
+                "pl-[3.7rem]"
               )}
               placeholder="exemplo"
               {...register("code")}
