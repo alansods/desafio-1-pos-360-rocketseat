@@ -1,3 +1,4 @@
+import { CircleNotch } from "phosphor-react";
 import { Button } from "../../ui/Button";
 import { Modal } from "../../ui/Modal";
 
@@ -35,7 +36,14 @@ export function DeleteLinkModal({
             onClick={onConfirm}
             disabled={isDeleting}
           >
-            {isDeleting ? "Excluindo..." : "Excluir"}
+            {isDeleting ? (
+              <span className="flex items-center justify-center gap-2">
+                <CircleNotch size={20} className="animate-spin" />
+                Excluindo...
+              </span>
+            ) : (
+              "Excluir"
+            )}
           </Button>
         </>
       }

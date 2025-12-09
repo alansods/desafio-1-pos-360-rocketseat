@@ -53,7 +53,7 @@ export function LinkList() {
               />
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center py-6 gap-3 border-t border-gray-200">
+            <div className="flex flex-col items-center justify-center py-6 gap-3">
               <LinkIcon size={32} className="text-gray-300" />
               <p className="text-xs text-gray-500 uppercase">
                 ainda não existem links cadastrados

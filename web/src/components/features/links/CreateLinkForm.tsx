@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
-import { Warning } from "phosphor-react";
+import { Warning, CircleNotch } from "phosphor-react";
 import { createLinkSchema, CreateLinkSchema } from "../../../types/link";
 import { useLinks } from "../../../hooks/useLinks";
 import { Button } from "../../ui/Button";
@@ -24,10 +24,12 @@ export function CreateLinkForm() {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<CreateLinkSchema>({
     resolver: zodResolver(createLinkSchema),
   });
+
+  const isLoading = createLink.isPending;
 
   const onSubmit = (data: CreateLinkSchema) => {
     createLink.mutate(data, {
@@ -88,10 +90,17 @@ export function CreateLinkForm() {
 
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isLoading}
           className="w-full h-12 text-base"
         >
-          {isSubmitting ? "Salvando..." : "Salvar link"}
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <CircleNotch size={20} className="animate-spin" />
+              Salvando...
+            </span>
+          ) : (
+            "Salvar link"
+          )}
         </Button>
       </form>
 
