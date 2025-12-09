@@ -3,7 +3,7 @@ import { LinkList } from "../components/features/links/LinkList";
 
 export function Home() {
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4 md:px-20">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-10 px-4 md:px-20">
       <div className="w-full max-w-6xl space-y-8">
         {/* Header */}
         <div className="flex items-center justify-center md:justify-start">
