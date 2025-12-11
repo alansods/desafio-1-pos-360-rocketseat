@@ -93,8 +93,17 @@ export class LinkController {
   async exportLinksCSV(request: FastifyRequest, reply: FastifyReply) {
     try {
       const csvContent = await exportService.generateCsvContent();
-      const fileUrl = await exportService.uploadToStorage(csvContent);
 
+      // Modo local: se não tem credenciais Cloudflare, retorna CSV diretamente
+      if (!process.env.CLOUDFLARE_ACCOUNT_ID) {
+        return reply
+          .header('Content-Type', 'text/csv; charset=utf-8')
+          .header('Content-Disposition', 'attachment; filename="links.csv"')
+          .send(csvContent);
+      }
+
+      // Modo produção: faz upload para R2 e retorna URL
+      const fileUrl = await exportService.uploadToStorage(csvContent);
       return reply.send({ url: fileUrl });
     } catch (error: any) {
       console.error('[EXPORT CSV] Erro:', error);
