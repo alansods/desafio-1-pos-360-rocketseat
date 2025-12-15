@@ -3,6 +3,11 @@ import { linkService } from '../services/linkService';
 import { exportService } from '../services/exportService';
 import { createLinkSchema, getLinkSchema, deleteLinkSchema } from '../schemas/linkSchema';
 
+// Cache em memória para prevenir incrementos duplicados muito rápidos
+// Armazena timestamp do último incremento por link ID
+const lastIncrementCache = new Map<string, number>();
+const INCREMENT_COOLDOWN_MS = 1000; // 1 segundo de cooldown entre incrementos do mesmo link
+
 export class LinkController {
   async createLink(request: FastifyRequest, reply: FastifyReply) {
     try {
@@ -52,7 +57,28 @@ export class LinkController {
         return reply.code(404).send({ message: 'Link not found' });
       }
 
-      await linkService.incrementAccessCount(link.id);
+      // Verificar se já foi incrementado recentemente (proteção contra duplicatas)
+      const now = Date.now();
+      const lastIncrement = lastIncrementCache.get(link.id);
+      
+      if (lastIncrement && (now - lastIncrement) < INCREMENT_COOLDOWN_MS) {
+        // Incremento muito recente, pular para evitar contagem duplicada
+        // Mas ainda fazer o redirect
+      } else {
+        // Incrementar contador e atualizar cache
+        await linkService.incrementAccessCount(link.id);
+        lastIncrementCache.set(link.id, now);
+        
+        // Limpar cache antigo periodicamente (manter apenas últimos 5 minutos)
+        if (lastIncrementCache.size > 1000) {
+          const fiveMinutesAgo = now - 5 * 60 * 1000;
+          for (const [id, timestamp] of lastIncrementCache.entries()) {
+            if (timestamp < fiveMinutesAgo) {
+              lastIncrementCache.delete(id);
+            }
+          }
+        }
+      }
 
       // Adicionar headers para evitar cache do redirect
       return reply

@@ -59,14 +59,41 @@ export function useLinks() {
     const loadingToast = toast.loading('Exportando CSV...')
 
     try {
-      const response = await api.get('/links/export/csv')
+      const response = await api.get('/links/export/csv', {
+        responseType: 'blob', // Recebe como Blob para poder detectar o tipo
+      })
 
-      // O backend agora retorna { url: "..." }
-      if (response.data?.url) {
-        window.open(response.data.url, '_blank')
+      // Verificar Content-Type do header
+      const contentType = response.headers['content-type'] || ''
+      
+      if (contentType.includes('text/csv')) {
+        // Modo local: resposta é CSV direto
+        const csvContent = await response.data.text()
+        
+        // Criar Blob e fazer download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'links.csv')
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+        
         toast.success('CSV exportado com sucesso!', { id: loadingToast })
       } else {
-        toast.error('URL de exportação não encontrada', { id: loadingToast })
+        // Modo produção: resposta é JSON com URL do Cloudflare R2
+        // Converter Blob para texto e parsear JSON
+        const jsonText = await response.data.text()
+        const jsonData = JSON.parse(jsonText)
+        
+        if (jsonData?.url) {
+          window.open(jsonData.url, '_blank')
+          toast.success('CSV exportado com sucesso!', { id: loadingToast })
+        } else {
+          toast.error('URL de exportação não encontrada', { id: loadingToast })
+        }
       }
     } catch (error: any) {
       toast.error('Erro ao exportar CSV', {

@@ -1,16 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 export function Redirect() {
   const { code } = useParams();
   const [redirectUrl, setRedirectUrl] = useState<string>("");
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (code) {
+    if (code && !hasRedirected.current) {
       const backendUrl =
         import.meta.env.VITE_BACKEND_URL || "http://localhost:3333";
       const url = `${backendUrl}/${code}`;
       setRedirectUrl(url);
+
+      // Marcar como redirecionado antes de executar
+      hasRedirected.current = true;
 
       // Redireciona imediatamente - a página aparece durante o tempo natural de carregamento
       window.location.href = url;
