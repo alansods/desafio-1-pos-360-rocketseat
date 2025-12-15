@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '../lib/api'
-import { Link, CreateLinkSchema, PaginatedLinksResponse, Pagination } from '../types/link'
+import { CreateLinkSchema, PaginatedLinksResponse, Pagination } from '../types/link'
 
 const DEFAULT_PAGE_SIZE = 5
 
