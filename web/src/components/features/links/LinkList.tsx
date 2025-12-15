@@ -4,9 +4,22 @@ import { useLinks } from "../../../hooks/useLinks";
 import { Button } from "../../ui/Button";
 import { LinkItem } from "./LinkItem";
 import { DeleteLinkModal } from "./DeleteLinkModal";
+import { Pagination } from "../../ui/Pagination";
 
 export function LinkList() {
-  const { links, isLoading, deleteLink, exportCsv, isExporting } = useLinks();
+  const { 
+    links, 
+    isLoading, 
+    isFetching,
+    deleteLink, 
+    exportCsv, 
+    isExporting,
+    pagination,
+    currentPage,
+    pageSize,
+    goToPage,
+    changePageSize
+  } = useLinks();
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<
     string | null
   >(null);
@@ -29,7 +42,7 @@ export function LinkList() {
           variant="secondary"
           size="sm"
           onClick={exportCsv}
-          disabled={!links || links.length === 0 || isExporting}
+          disabled={pagination.total === 0 || isExporting}
         >
           {isExporting ? (
             <CircleNotch size={16} className="animate-spin" />
@@ -43,15 +56,27 @@ export function LinkList() {
       {isLoading ? (
         <div className="text-center py-10 text-gray-400">Carregando...</div>
       ) : (
-        <div>
+        <div className={isFetching ? "opacity-60 transition-opacity" : ""}>
           {links && links.length > 0 ? (
-            links.map((link) => (
-              <LinkItem
-                key={link.id}
-                link={link}
-                onDelete={setDeleteConfirmationId}
+            <>
+              {links.map((link) => (
+                <LinkItem
+                  key={link.id}
+                  link={link}
+                  onDelete={setDeleteConfirmationId}
+                />
+              ))}
+              
+              <Pagination
+                currentPage={currentPage}
+                totalPages={pagination.totalPages}
+                total={pagination.total}
+                pageSize={pageSize}
+                onPageChange={goToPage}
+                onPageSizeChange={changePageSize}
+                isLoading={isFetching}
               />
-            ))
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-6 gap-3">
               <LinkIcon size={32} className="text-gray-300" />

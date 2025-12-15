@@ -2,24 +2,38 @@ import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { api } from '../lib/api'
-import { Link, CreateLinkSchema } from '../types/link'
+import { Link, CreateLinkSchema, PaginatedLinksResponse, Pagination } from '../types/link'
 
-export function useLinks() {
+const DEFAULT_PAGE_SIZE = 5
+
+export function useLinks(initialPage: number = 1, initialPageSize: number = DEFAULT_PAGE_SIZE) {
   const queryClient = useQueryClient()
   const [isExporting, setIsExporting] = useState(false)
+  const [page, setPage] = useState(initialPage)
+  const [pageSize, setPageSize] = useState(initialPageSize)
 
-  const { data: links, isLoading, error, isError } = useQuery<Link[]>({
-    queryKey: ['links'],
+  const { data, isLoading, error, isError, isFetching } = useQuery<PaginatedLinksResponse>({
+    queryKey: ['links', page, pageSize],
     queryFn: async () => {
-      const response = await api.get('/links')
+      const response = await api.get('/links', {
+        params: { page, pageSize }
+      })
       return response.data
     },
     refetchOnWindowFocus: true,
-    refetchInterval: 10000, // Refetch a cada 10 segundos
-    staleTime: 0, // Dados sempre considerados velhos
-    gcTime: 0, // Não manter cache
+    staleTime: 0,
+    gcTime: 0,
     retry: 2,
+    placeholderData: (previousData) => previousData,
   })
+
+  const links = data?.data ?? []
+  const pagination: Pagination = data?.pagination ?? {
+    page: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0,
+    totalPages: 1
+  }
 
   // Tratamento de erro usando useEffect
   useEffect(() => {
@@ -35,6 +49,7 @@ export function useLinks() {
       await api.post('/links', data)
     },
     onSuccess: () => {
+      setPage(1) // Voltar para primeira página para ver o novo link
       queryClient.invalidateQueries({ queryKey: ['links'] })
     },
   })
@@ -106,12 +121,36 @@ export function useLinks() {
     }
   }
 
+  const goToPage = (newPage: number) => {
+    const maxPage = pagination.totalPages || 1
+    if (newPage >= 1 && newPage <= maxPage) {
+      setPage(newPage)
+    }
+  }
+
+  const changePageSize = (newPageSize: number) => {
+    setPageSize(newPageSize)
+    setPage(1) // Voltar para primeira página ao mudar o tamanho
+  }
+
+  // Voltar para primeira página quando criar ou deletar
+  const resetToFirstPage = () => {
+    setPage(1)
+  }
+
   return {
     links,
     isLoading,
+    isFetching,
     createLink,
     deleteLink,
     exportCsv,
     isExporting,
+    pagination,
+    currentPage: page,
+    pageSize,
+    goToPage,
+    changePageSize,
+    resetToFirstPage,
   }
 }

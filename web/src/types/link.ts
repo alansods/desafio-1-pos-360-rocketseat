@@ -16,3 +16,15 @@ export interface Link {
   accessCount: number
   createdAt: string
 }
+
+export interface Pagination {
+  page: number
+  pageSize: number
+  total: number
+  totalPages: number
+}
+
+export interface PaginatedLinksResponse {
+  data: Link[]
+  pagination: Pagination
+}

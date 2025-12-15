@@ -32,16 +32,23 @@ export class LinkController {
     }
   }
 
-  async getAllLinks(request: FastifyRequest, reply: FastifyReply) {
+  async getAllLinks(request: FastifyRequest<{ Querystring: { page?: string; pageSize?: string } }>, reply: FastifyReply) {
     try {
-      const links = await linkService.getAllLinks();
-      return reply.send(links.map(link => ({
-        id: link.id,
-        url: link.originalUrl,
-        shortUrl: link.code,
-        createdAt: link.createdAt,
-        accessCount: link.accessCount
-      })));
+      const page = Math.max(1, parseInt(request.query.page || '1', 10))
+      const pageSize = Math.min(50, Math.max(1, parseInt(request.query.pageSize || '5', 10)))
+
+      const result = await linkService.getAllLinks(page, pageSize);
+      
+      return reply.send({
+        data: result.data.map(link => ({
+          id: link.id,
+          url: link.originalUrl,
+          shortUrl: link.code,
+          createdAt: link.createdAt,
+          accessCount: link.accessCount
+        })),
+        pagination: result.pagination
+      });
     } catch (error) {
       return reply.code(500).send({ message: 'Erro ao buscar links' });
     }
