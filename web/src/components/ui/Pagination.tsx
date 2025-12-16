@@ -29,10 +29,11 @@ export function Pagination({
   const canGoNext = currentPage < totalPages;
 
   return (
-    <div className="flex items-center justify-between mt-6 pt-4">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4">
       {/* Seletor de itens por página */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-500">Itens por página:</span>
+        <span className="text-sm text-gray-500 hidden sm:inline">Itens por página:</span>
+        <span className="text-sm text-gray-500 sm:hidden">Por página:</span>
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
@@ -53,14 +54,14 @@ export function Pagination({
       </div>
 
       {/* Range e navegação */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {/* Texto do range */}
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500 whitespace-nowrap">
           {startItem}-{endItem} de {total}
         </span>
 
         {/* Botões de navegação */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           {/* Primeira página */}
           <button
             onClick={() => onPageChange(1)}
